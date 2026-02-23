@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docking System — Component Test</title>
+<link rel="stylesheet" href="css/dock.css">
+<style>
+  /* ── Test harness extras ─────────────────────────────── */
+  #toolbar {
+    position: fixed; top: 10px; right: 12px; z-index: 9999;
+    display: flex; gap: 6px; flex-direction: column; align-items: flex-end;
+  }
+  .tb-btn {
+    background: rgba(20,20,40,.82); color: #e8e8f0;
+    border: 1px solid rgba(255,255,255,.15);
+    padding: 5px 12px; border-radius: 4px; font-size: 11px;
+    cursor: pointer; backdrop-filter: blur(4px);
+    transition: background .15s;
+  }
+  .tb-btn:hover { background: rgba(60,80,180,.9); }
+  #tb-legend {
+    background: rgba(20,20,40,.78); color: #b0b8cc;
+    border: 1px solid rgba(255,255,255,.12); border-radius: 6px;
+    padding: 8px 12px; font-size: 10px; line-height: 1.7;
+    backdrop-filter: blur(4px); max-width: 220px; text-align: right;
+  }
+  #tb-legend strong { color: #c8d4ff; display: block; margin-bottom: 3px; }
+  kbd {
+    background: #3a3a5a; color: #dde; padding: 1px 5px;
+    border-radius: 3px; font-family: monospace; font-size: 10px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Root container – DockingSystem will fill this -->
+<div id="docking-container"></div>
+
+<!-- Ctrl hint toast (referenced by shortcuts.js) -->
+<div id="ctrl-hint">Press <kbd>Ctrl</kbd> while hovering a dock to toggle controls</div>
+
+<!-- Test toolbar -->
+<div id="toolbar">
+  <div id="tb-legend">
+    <strong>How to use</strong>
+    Hover a dock, press <kbd>Ctrl</kbd><br>
+    ☰ Move   — drag to reposition<br>
+    ⊞ Tab    — drag to merge as tab<br>
+    ✕ Remove — close panel / dock<br>
+    ⊟ Ungroup — split tabs apart<br>
+    Drag resize handles to resize<br>
+    Drag ● connection points (2-axis)
+  </div>
+  <button class="tb-btn" id="btn-add-dock">＋ Add Dock</button>
+  <button class="tb-btn" id="btn-add-tabbed">＋ Add Tabbed Dock</button>
+  <button class="tb-btn" id="btn-add-panel">＋ Panel to first dock</button>
+</div>
+
+<script type="module">
+  import { DockingSystem } from './js/main.js';
+
+  /* ── Instantiate the component ───────────────────────────────────────── */
+  const sys = new DockingSystem('docking-container');
+
+  /* ── Test toolbar actions ────────────────────────────────────────────── */
+
+  // Add a plain dock with a single panel
+  document.getElementById('btn-add-dock').addEventListener('click', () => {
+    sys.addDock(null, [
+      sys.createPanel(
+        `Dock ${sys.dockCounter}`,
+        `<div class="dock-card">Dynamically added dock #${sys.dockCounter}</div>`
+      ),
+    ]);
+  });
+
+  // Add a dock that already has two tabs
+  document.getElementById('btn-add-tabbed').addEventListener('click', () => {
+    const n = sys.dockCounter + 1;
+    sys.addDock(null, [
+      sys.createPanel(`Alpha ${n}`, `<div class="dock-card">Tab Alpha in dock ${n}</div>`),
+      sys.createPanel(`Beta ${n}`,  `<div class="dock-card">Tab Beta in dock ${n}</div>`),
+    ], 'top');
+  });
+
+  // Programmatically push a new panel into the first existing dock
+  document.getElementById('btn-add-panel').addEventListener('click', () => {
+    const firstDock = sys.docks[0];
+    if (!firstDock) return;
+    const panel = sys.createPanel(
+      `Dynamic ${sys.panelCounter + 1}`,
+      `<div class="dock-card">Programmatic panel #${sys.panelCounter + 1}</div>`
+    );
+    firstDock.panelData.push(panel);
+    firstDock.activePanelIndex = firstDock.panelData.length - 1;
+
+    // rebuildDockUI is not part of the public API but is re-exported by dock.js
+    // for advanced use; import it only when needed.
+    import('./js/dock.js').then(({ rebuildDockUI }) => {
+      rebuildDockUI(sys, firstDock);
+      // Re-run splitter after a structural change
+      import('./js/splitter.js').then(({ updateResizeHandles, updateConnectionPoints }) => {
+        updateResizeHandles(sys);
+        updateConnectionPoints(sys);
+      });
+    });
+  });
+</script>
+</body>
+</html>
