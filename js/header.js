@@ -11,7 +11,8 @@
 /**
  * Returns the HTML for the dark "N tabs" group header that appears above the
  * tab-bar when the user presses Ctrl.  It exposes "☰ Group" (drag to move the
- * whole tab-group) and "⊟ Ungroup" (split all tabs into individual docks).
+ * whole tab-group), "⊟ Ungroup" (split all tabs into individual docks), and
+ * "▼ Collapse" (collapse the tab group).
  *
  * @param {Array} panels  – the dock's panelData array
  * @returns {string}
@@ -25,18 +26,21 @@ export function buildGroupHeaderHTML(panels) {
                     title="Drag to reposition entire tab group">☰ Group</button>
             <button class="tgh-btn tgh-ungroup"
                     title="Split all tabs into individual docks">⊟ Ungroup</button>
+            <button class="tgh-btn tgh-collapse"
+                    title="Collapse this tab group">▼</button>
         </div>
     </div>`;
 }
 
 /**
  * Returns the HTML for the per-panel dock header (shown on Ctrl).
- * It exposes three controls:
- *   ☰  Move   – detach this tab as an individual dock  (multi-tab)
- *             / reposition this dock                   (single)
- *   ⊞  Tab    – move this tab into another dock        (multi-tab)
- *             / merge this dock as a tab into another  (single)
- *   ✕  Remove – close this tab / dock
+ * It exposes four controls:
+ *   ☰  Move    – detach this tab as an individual dock  (multi-tab)
+ *              / reposition this dock                   (single)
+ *   ⊞  Tab     – move this tab into another dock        (multi-tab)
+ *              / merge this dock as a tab into another  (single)
+ *   ▼  Collapse – collapse this dock horizontally or vertically
+ *   ✕  Remove  – close this tab / dock
  *
  * @param {string}  title   – active panel title
  * @param {boolean} hasTabs – true when the dock holds 2+ panels
@@ -54,6 +58,8 @@ export function buildDockHeaderHTML(title, hasTabs) {
                         : 'Drag: reposition this dock (center=swap)'}">☰</button>
             <button class="dc-btn dh-tabify"
                     title="Drag: move ${hasTabs ? 'this tab' : 'this dock'} as tab into another dock or tabs group">⊞</button>
+            <button class="dc-btn dh-collapse"
+                    title="Collapse this dock">▼</button>
             <button class="dc-btn dh-remove"
                     title="Remove ${hasTabs ? 'this tab' : 'this dock'}">✕</button>
         </div>

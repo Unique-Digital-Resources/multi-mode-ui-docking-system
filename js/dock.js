@@ -16,6 +16,7 @@ import { buildGroupHeaderHTML, buildDockHeaderHTML, hideDockHeaders } from './he
 import { beginDrag, cleanupEmptyContainer }                           from './placement.js';
 import { activatePanel, removePanel, ungroupTabs }                    from './tab-group.js';
 import { updateResizeHandles, updateConnectionPoints }                 from './splitter.js';
+import { toggleCollapse, canCollapse }                                 from './collapse.js';
 
 /* ── Utilities ──────────────────────────────────────────────────────────── */
 
@@ -181,6 +182,7 @@ export function setupDockEvents(sys, dock) {
     /* ── Tabs Group Header ─────────────────────────────────────────────
        "☰ Group"  → drag the entire tab-group to a new position (mode: 'move')
        "⊟ Ungroup" → split every tab into its own separate dock
+       "▼ Collapse" → collapse the tab group
     ── */
     dock.querySelector('.tgh-move')?.addEventListener('mousedown', (e) => {
         e.preventDefault();
@@ -191,6 +193,14 @@ export function setupDockEvents(sys, dock) {
         ungroupTabs(sys, dock);
     });
 
+    dock.querySelector('.tgh-collapse')?.addEventListener('click', () => {
+        if (canCollapse(dock)) {
+            toggleCollapse(dock);
+            updateResizeHandles(sys);
+            updateConnectionPoints(sys);
+        }
+    });
+
     /* ── Dock Header ───────────────────────────────────────────────────
        "☰ Move"
          multi-tab → detach active tab as standalone dock  (mode: 'detach')
@@ -199,6 +209,9 @@ export function setupDockEvents(sys, dock) {
        "⊞ Tab"
          multi-tab → move active tab into another dock     (mode: 'tab-move')
          single    → merge whole dock as tab               (mode: 'tabify')
+
+       "▼ Collapse"
+         collapse dock horizontally or vertically based on parent layout
 
        "✕ Remove"
          multi-tab → close the active tab
@@ -216,6 +229,14 @@ export function setupDockEvents(sys, dock) {
         hasTabs
             ? beginDrag(sys, e, dock, 'tab-move', dock.activePanelIndex)
             : beginDrag(sys, e, dock, 'tabify',   null);
+    });
+
+    dock.querySelector('.dh-collapse')?.addEventListener('click', () => {
+        if (canCollapse(dock)) {
+            toggleCollapse(dock);
+            updateResizeHandles(sys);
+            updateConnectionPoints(sys);
+        }
     });
 
     dock.querySelector('.dh-remove')?.addEventListener('click', () => {

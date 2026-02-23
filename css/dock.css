@@ -98,7 +98,104 @@ body {
 .dh-tabify              { cursor:grab; color:#0066cc; font-size:12px; }
 .dh-tabify:hover        { background:#e6f0ff; border-color:#4488cc; }
 .dh-tabify:active       { cursor:grabbing; }
+.dh-collapse            { color:#666; font-size:10px; }
+.dh-collapse:hover      { background:#e8f4e8; border-color:#88c888; color:#2a2; }
 .dh-remove:hover        { background:#fee; border-color:#f88; color:#c00; }
+
+/* ══════════════════════════════════════
+   COLLAPSED DOCK STATES
+══════════════════════════════════════ */
+.dock.collapsed-h {
+    min-width: 0 !important;
+    width: 28px !important;
+    flex: 0 0 28px !important;
+    overflow: visible !important;
+}
+.dock.collapsed-v {
+    min-height: 0 !important;
+    height: 28px !important;
+    flex: 0 0 28px !important;
+    overflow: visible !important;
+}
+
+/* Collapsed dock shows header with expand button */
+.dock.collapsed-h > .dock-header,
+.dock.collapsed-v > .dock-header {
+    display: flex !important;
+    position: relative;
+}
+
+/* For horizontal collapse, show header vertically */
+.dock.collapsed-h > .dock-header {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 4px 2px;
+    height: 100%;
+    border-bottom: none;
+    border-right: 1px solid #d4d4d4;
+}
+
+.dock.collapsed-h > .dock-header .dock-title {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    flex: 1;
+}
+
+.dock.collapsed-h > .dock-header .dock-controls {
+    flex-direction: column;
+    writing-mode: horizontal-tb;
+}
+
+/* For vertical collapse, show header horizontally */
+.dock.collapsed-v > .dock-header {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 2px 4px;
+    width: 100%;
+    border-bottom: none;
+    border-top: 1px solid #d4d4d4;
+}
+
+.dock.collapsed-v > .dock-header .dock-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dock.collapsed-v > .dock-header .dock-controls {
+    flex-direction: row;
+}
+
+/* Hide body and tabs-group-header when collapsed */
+.dock.collapsed-h > .dock-body,
+.dock.collapsed-v > .dock-body,
+.dock.collapsed-h > .tabs-group-header,
+.dock.collapsed-v > .tabs-group-header {
+    display: none !important;
+}
+
+/* Collapse button icon rotation when collapsed */
+.dock.collapsed-h .dh-collapse,
+.dock.collapsed-v .dh-collapse {
+    transform: rotate(180deg);
+}
+
+/* Tab group collapse button */
+.tgh-collapse {
+    color: #88c888;
+}
+.tgh-collapse:hover {
+    background: rgba(136, 200, 136, 0.2);
+    border-color: rgba(136, 200, 136, 0.4);
+}
+.dock.collapsed-h .tgh-collapse,
+.dock.collapsed-v .tgh-collapse {
+    transform: rotate(180deg);
+}
 
 /* ══════════════════════════════════════
    DOCK BODY
