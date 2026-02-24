@@ -27,9 +27,9 @@ import { toggleCollapse, canCollapse }                                 from './c
  */
 export function esc(s) {
     return String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+        .replace(/&/g, '&')
+        .replace(/</g, '<')
+        .replace(/>/g, '>');
 }
 
 /* ── Panel factory ──────────────────────────────────────────────────────── */
@@ -117,9 +117,10 @@ export function rebuildDockUI(sys, dock) {
     dock.activePanelIndex = ai;
 
     const hasTabs = panels.length > 1;
+    const tabsPos = dock.dataset.tabsPos || 'top';
 
     /* ── Group header (multi-tab only) ── */
-    const groupHdr = hasTabs ? buildGroupHeaderHTML(panels) : '';
+    const groupHdr = hasTabs ? buildGroupHeaderHTML(panels, tabsPos) : '';
 
     /* ── Per-panel dock header ── */
     const dockHdr = buildDockHeaderHTML(panels[ai].title, hasTabs);
@@ -159,6 +160,18 @@ export function rebuildDockUI(sys, dock) {
     setupDockEvents(sys, dock);
 }
 
+/**
+ * Changes the tabs position for a dock and rebuilds its UI.
+ *
+ * @param {DockingSystem} sys
+ * @param {HTMLElement}   dock
+ * @param {string}        tabsPos – 'top'|'bottom'|'left'|'right'
+ */
+export function setTabsPosition(sys, dock, tabsPos) {
+    dock.dataset.tabsPos = tabsPos;
+    rebuildDockUI(sys, dock);
+}
+
 /* ── Event wiring ───────────────────────────────────────────────────────── */
 
 /**
@@ -180,9 +193,11 @@ export function setupDockEvents(sys, dock) {
     });
 
     /* ── Tabs Group Header ─────────────────────────────────────────────
-       "☰ Group"  → drag the entire tab-group to a new position (mode: 'move')
-       "⊟ Ungroup" → split every tab into its own separate dock
-       "▼ Collapse" → collapse the tab group
+        "☰ Group"  → drag the entire tab-group to a new position (mode: 'move')
+        "⊟ Ungroup" → split every tab into its own separate dock
+        "⤴/⤵/⤶/⤷" → change tabs position
+        "▼ Collapse" → collapse the tab group
+        "✕ Remove" → remove the entire tab group
     ── */
     dock.querySelector('.tgh-move')?.addEventListener('mousedown', (e) => {
         e.preventDefault();
@@ -193,6 +208,20 @@ export function setupDockEvents(sys, dock) {
         ungroupTabs(sys, dock);
     });
 
+    // Tabs position buttons
+    dock.querySelector('.tgh-pos-top')?.addEventListener('click', () => {
+        setTabsPosition(sys, dock, 'top');
+    });
+    dock.querySelector('.tgh-pos-bottom')?.addEventListener('click', () => {
+        setTabsPosition(sys, dock, 'bottom');
+    });
+    dock.querySelector('.tgh-pos-left')?.addEventListener('click', () => {
+        setTabsPosition(sys, dock, 'left');
+    });
+    dock.querySelector('.tgh-pos-right')?.addEventListener('click', () => {
+        setTabsPosition(sys, dock, 'right');
+    });
+
     dock.querySelector('.tgh-collapse')?.addEventListener('click', () => {
         if (canCollapse(dock)) {
             toggleCollapse(dock);
@@ -201,21 +230,25 @@ export function setupDockEvents(sys, dock) {
         }
     });
 
+    dock.querySelector('.tgh-remove')?.addEventListener('click', () => {
+        removeDock(sys, dock);
+    });
+
     /* ── Dock Header ───────────────────────────────────────────────────
-       "☰ Move"
-         multi-tab → detach active tab as standalone dock  (mode: 'detach')
-         single    → move entire dock                      (mode: 'move')
+        "☰ Move"
+            multi-tab → detach active tab as standalone dock  (mode: 'detach')
+            single    → move entire dock                      (mode: 'move')
 
-       "⊞ Tab"
-         multi-tab → move active tab into another dock     (mode: 'tab-move')
-         single    → merge whole dock as tab               (mode: 'tabify')
+        "⊞ Tab"
+            multi-tab → move active tab into another dock     (mode: 'tab-move')
+            single    → merge whole dock as tab               (mode: 'tabify')
 
-       "▼ Collapse"
-         collapse dock horizontally or vertically based on parent layout
+        "▼ Collapse" (single dock only)
+            collapse dock horizontally or vertically based on parent layout
 
-       "✕ Remove"
-         multi-tab → close the active tab
-         single    → remove the dock
+        "✕ Remove"
+            multi-tab → close the active tab
+            single    → remove the dock
     ── */
     dock.querySelector('.dh-move')?.addEventListener('mousedown', (e) => {
         e.preventDefault();
@@ -246,8 +279,8 @@ export function setupDockEvents(sys, dock) {
     });
 
     /* ── Tabs bar ──────────────────────────────────────────────────────
-       Click a tab title → activate that panel.
-       Click × → close that tab.
+        Click a tab title → activate that panel.
+        Click × → close that tab.
     ── */
     dock.querySelectorAll('.dock-tab').forEach(tab => {
         tab.addEventListener('click', (e) => {

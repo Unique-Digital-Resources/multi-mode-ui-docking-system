@@ -10,14 +10,21 @@
 
 /**
  * Returns the HTML for the dark "N tabs" group header that appears above the
- * tab-bar when the user presses Ctrl.  It exposes "☰ Group" (drag to move the
- * whole tab-group), "⊟ Ungroup" (split all tabs into individual docks), and
- * "▼ Collapse" (collapse the tab group).
+ * tab-bar when the user presses Ctrl.  It exposes:
+ *   ☰ Group    – drag to move the whole tab-group
+ *   ⊟ Ungroup  – split all tabs into individual docks
+ *   ⤴ Top      – set tabs position to top
+ *   ⤵ Bottom   – set tabs position to bottom
+ *   ⤶ Left     – set tabs position to left
+ *   ⤷ Right    – set tabs position to right
+ *   ▼ Collapse – collapse the tab group
+ *   ✕ Remove   – remove the entire tab group
  *
  * @param {Array} panels  – the dock's panelData array
+ * @param {string} tabsPos – current tabs position ('top'|'bottom'|'left'|'right')
  * @returns {string}
  */
-export function buildGroupHeaderHTML(panels) {
+export function buildGroupHeaderHTML(panels, tabsPos) {
     return `
     <div class="tabs-group-header">
         <span class="tgh-label">${panels.length} tabs</span>
@@ -26,20 +33,31 @@ export function buildGroupHeaderHTML(panels) {
                     title="Drag to reposition entire tab group">☰ Group</button>
             <button class="tgh-btn tgh-ungroup"
                     title="Split all tabs into individual docks">⊟ Ungroup</button>
+            <div class="tgh-tabs-pos">
+                <button class="tgh-btn tgh-pos-top ${tabsPos === 'top' ? 'active' : ''}"
+                        title="Tabs on top">⤴</button>
+                <button class="tgh-btn tgh-pos-bottom ${tabsPos === 'bottom' ? 'active' : ''}"
+                        title="Tabs on bottom">⤵</button>
+                <button class="tgh-btn tgh-pos-left ${tabsPos === 'left' ? 'active' : ''}"
+                        title="Tabs on left">⤶</button>
+                <button class="tgh-btn tgh-pos-right ${tabsPos === 'right' ? 'active' : ''}"
+                        title="Tabs on right">⤷</button>
+            </div>
             <button class="tgh-btn tgh-collapse"
                     title="Collapse this tab group">▼</button>
+            <button class="tgh-btn tgh-remove"
+                    title="Remove entire tab group">✕</button>
         </div>
     </div>`;
 }
 
 /**
  * Returns the HTML for the per-panel dock header (shown on Ctrl).
- * It exposes four controls:
+ * It exposes three controls (collapse removed for tabs in a group):
  *   ☰  Move    – detach this tab as an individual dock  (multi-tab)
  *              / reposition this dock                   (single)
  *   ⊞  Tab     – move this tab into another dock        (multi-tab)
  *              / merge this dock as a tab into another  (single)
- *   ▼  Collapse – collapse this dock horizontally or vertically
  *   ✕  Remove  – close this tab / dock
  *
  * @param {string}  title   – active panel title
@@ -58,8 +76,8 @@ export function buildDockHeaderHTML(title, hasTabs) {
                         : 'Drag: reposition this dock (center=swap)'}">☰</button>
             <button class="dc-btn dh-tabify"
                     title="Drag: move ${hasTabs ? 'this tab' : 'this dock'} as tab into another dock or tabs group">⊞</button>
-            <button class="dc-btn dh-collapse"
-                    title="Collapse this dock">▼</button>
+            ${!hasTabs ? `<button class="dc-btn dh-collapse"
+                    title="Collapse this dock">▼</button>` : ''}
             <button class="dc-btn dh-remove"
                     title="Remove ${hasTabs ? 'this tab' : 'this dock'}">✕</button>
         </div>
@@ -113,7 +131,7 @@ export function hideAllDockHeaders(sys) {
 /* ── Internal utility ───────────────────────────────────────────────────── */
 function escapeHTML(s) {
     return String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+        .replace(/&/g, '&')
+        .replace(/</g, '<')
+        .replace(/>/g, '>');
 }
