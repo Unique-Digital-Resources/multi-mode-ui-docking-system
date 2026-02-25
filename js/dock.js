@@ -17,6 +17,7 @@ import { beginDrag, cleanupEmptyContainer }                           from './pl
 import { activatePanel, removePanel, ungroupTabs }                    from './tab-group.js';
 import { updateResizeHandles, updateConnectionPoints }                 from './splitter.js';
 import { toggleCollapse, canCollapse }                                 from './collapse.js';
+import { beginEmbedDrag }                                              from './embedded.js';
 
 /* ── Utilities ──────────────────────────────────────────────────────────── */
 
@@ -194,6 +195,7 @@ export function setupDockEvents(sys, dock) {
 
     /* ── Tabs Group Header ─────────────────────────────────────────────
         "☰ Group"  → drag the entire tab-group to a new position (mode: 'move')
+        "📦 Embed" → drag to embed the tab group inside another dock (mode: 'embed')
         "⊟ Ungroup" → split every tab into its own separate dock
         "⤴/⤵/⤶/⤷" → change tabs position
         "▼ Collapse" → collapse the tab group
@@ -202,6 +204,11 @@ export function setupDockEvents(sys, dock) {
     dock.querySelector('.tgh-move')?.addEventListener('mousedown', (e) => {
         e.preventDefault();
         beginDrag(sys, e, dock, 'move', null);
+    });
+
+    dock.querySelector('.tgh-embed')?.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        beginEmbedDrag(sys, e, dock, null);
     });
 
     dock.querySelector('.tgh-ungroup')?.addEventListener('click', () => {
@@ -243,6 +250,10 @@ export function setupDockEvents(sys, dock) {
             multi-tab → move active tab into another dock     (mode: 'tab-move')
             single    → merge whole dock as tab               (mode: 'tabify')
 
+        "📦 Embed"
+            multi-tab → embed active tab inside another dock  (mode: 'embed')
+            single    → embed whole dock inside another dock  (mode: 'embed')
+
         "▼ Collapse" (single dock only)
             collapse dock horizontally or vertically based on parent layout
 
@@ -262,6 +273,11 @@ export function setupDockEvents(sys, dock) {
         hasTabs
             ? beginDrag(sys, e, dock, 'tab-move', dock.activePanelIndex)
             : beginDrag(sys, e, dock, 'tabify',   null);
+    });
+
+    dock.querySelector('.dh-embed')?.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        beginEmbedDrag(sys, e, dock, hasTabs ? dock.activePanelIndex : null);
     });
 
     dock.querySelector('.dh-collapse')?.addEventListener('click', () => {

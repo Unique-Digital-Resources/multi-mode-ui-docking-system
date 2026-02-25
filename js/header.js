@@ -31,6 +31,8 @@ export function buildGroupHeaderHTML(panels, tabsPos) {
         <div class="tgh-controls">
             <button class="tgh-btn tgh-move"
                     title="Drag to reposition entire tab group">☰ Group</button>
+            <button class="tgh-btn tgh-embed"
+                    title="Drag to embed this tab group inside another dock">📦 Embed</button>
             <button class="tgh-btn tgh-ungroup"
                     title="Split all tabs into individual docks">⊟ Ungroup</button>
             <div class="tgh-tabs-pos">
@@ -76,6 +78,8 @@ export function buildDockHeaderHTML(title, hasTabs) {
                         : 'Drag: reposition this dock (center=swap)'}">☰</button>
             <button class="dc-btn dh-tabify"
                     title="Drag: move ${hasTabs ? 'this tab' : 'this dock'} as tab into another dock or tabs group">⊞</button>
+            <button class="dc-btn dh-embed"
+                    title="Drag: embed ${hasTabs ? 'this tab' : 'this dock'} inside another dock">📦</button>
             ${!hasTabs ? `<button class="dc-btn dh-collapse"
                     title="Collapse this dock">▼</button>` : ''}
             <button class="dc-btn dh-remove"

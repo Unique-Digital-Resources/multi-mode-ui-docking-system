@@ -55,6 +55,9 @@ body {
 .tgh-btn:hover       { background:rgba(255,255,255,.22); }
 .tgh-move            { cursor:grab; }
 .tgh-move:active     { cursor:grabbing; }
+.tgh-embed           { color:#4a90e2; cursor:grab; }
+.tgh-embed:hover     { background:rgba(74,144,226,.2); border-color:rgba(74,144,226,.4); }
+.tgh-embed:active    { cursor:grabbing; }
 .tgh-ungroup         { color:#f0c060; }
 .tgh-ungroup:hover   { background:rgba(240,192,96,.2); border-color:rgba(240,192,96,.4); }
 
@@ -140,6 +143,12 @@ body {
 .dh-tabify              { cursor:grab; color:#0066cc; font-size:12px; }
 .dh-tabify:hover        { background:#e6f0ff; border-color:#4488cc; }
 .dh-tabify:active       { cursor:grabbing; }
+.dh-embed               { cursor:grab; color:#4a90e2; font-size:14px; }
+.dh-embed:hover         { background:#e8f4ff; border-color:#4a90e2; }
+.dh-embed:active        { cursor:grabbing; }
+.dh-extract             { cursor:grab; color:#808080; font-size:12px; }
+.dh-extract:hover       { background:#f0f0f0; border-color:#606060; }
+.dh-extract:active      { cursor:grabbing; }
 .dh-collapse            { color:#666; font-size:10px; }
 .dh-collapse:hover      { background:#e8f4e8; border-color:#88c888; color:#2a2; }
 .dh-remove:hover        { background:#fee; border-color:#f88; color:#c00; }
@@ -369,7 +378,7 @@ body {
 }
 .tab-close:hover { background:#fcc; color:#c00; }
 
-/* -- DOCK MAIN / CONTENT -- */
+/* -- EMBEDDED DOCK STYLES -- */
 .dock-main {
     display:flex; flex-direction:column;
     flex:1; overflow:hidden; min-width:0; min-height:0;
@@ -377,6 +386,7 @@ body {
 .dock-content {
     flex:1; overflow:auto;
     display:flex; flex-direction:column;
+    position: relative;
 }
 .dock-panel { display:none; flex-direction:column; flex:1; padding:15px; min-height:0; }
 .dock-panel.active { display:flex; }
@@ -453,3 +463,296 @@ body {
 }
 #ctrl-hint.show { opacity:1; }
 kbd { background:#555;padding:1px 5px;border-radius:3px;font-family:monospace; }
+
+/* -- EMBEDDED LAYER -- */
+.dock-embedded-layer {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.embed-drop-indicator {
+    position: absolute;
+    pointer-events: none;
+    z-index: 510;
+    display: none;
+    background: rgba(74, 144, 226, 0.15);
+    border: 2px dashed #4a90e2;
+    transition: background 0.15s ease;
+}
+
+.embed-drop-indicator.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.embed-drop-indicator.top {
+    top: 8px; left: 8px; right: 8px;
+    height: 25%;
+}
+
+.embed-drop-indicator.bottom {
+    bottom: 8px; left: 8px; right: 8px;
+    height: 25%;
+}
+
+.embed-drop-indicator.left {
+    top: 8px; bottom: 8px; left: 8px;
+    width: 25%;
+}
+
+.embed-drop-indicator.right {
+    top: 8px; bottom: 8px; right: 8px;
+    width: 25%;
+}
+
+.embed-drop-indicator::after {
+    content: attr(data-label);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 11px;
+    font-weight: 600;
+    color: #4a90e2;
+    background: rgba(255,255,255,0.9);
+    padding: 3px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+}
+
+.embed-drop-indicator.active:hover {
+    background: rgba(74, 144, 226, 0.25);
+}
+
+.embedded-dock {
+    position: absolute;
+    background: white;
+    border: 2px solid #4a90e2;
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    z-index: 2;
+    min-width: 150px;
+    min-height: 100px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+}
+
+.embedded-dock.dragging {
+    opacity: 0.9;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    pointer-events: none;
+}
+
+.embedded-dock.embedded-top,
+.embedded-dock.embedded-bottom {
+    min-height: 80px;
+}
+
+.embedded-dock.embedded-left,
+.embedded-dock.embedded-right {
+    min-width: 120px;
+}
+
+/* Embedded dock header with sub-mode buttons */
+.embedded-dock > .dock-header {
+    display: flex !important;
+    background: #e8f0ff;
+    border-bottom: 1px solid #a0c0e8;
+    flex-shrink: 0;
+    pointer-events: auto;
+    user-select: none;
+}
+
+.embedded-dock > .dock-header:hover {
+    background: #dce8ff;
+}
+
+.embedded-dock > .dock-header .dock-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.embedded-dock > .dock-header .dock-controls {
+    display: flex;
+    gap: 3px;
+    pointer-events: auto;
+}
+
+.embedded-dock > .dock-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+}
+
+.embedded-dock > .dock-body > .dock-tabs-bar {
+    display: flex;
+    flex-shrink: 0;
+    background: #f2f2f2;
+    flex-direction: row;
+    overflow-x: auto;
+    border-bottom: 1px solid #d8d8d8;
+    pointer-events: auto;
+}
+
+.embedded-dock > .dock-body > .dock-tabs-bar > .dock-tab {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    font-size: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    color: #777;
+    flex-shrink: 0;
+    user-select: none;
+    border-bottom: 2px solid transparent;
+}
+
+.embedded-dock > .dock-body > .dock-tabs-bar > .dock-tab:hover {
+    background: #e6e6e6;
+}
+
+.embedded-dock > .dock-body > .dock-tabs-bar > .dock-tab.active {
+    background: white;
+    color: #111;
+    border-bottom-color: #4a90e2;
+}
+
+.embedded-dock > .dock-body > .dock-main {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.embedded-dock > .dock-body > .dock-main > .dock-content {
+    flex: 1;
+    padding: 8px;
+    overflow: auto;
+}
+
+.embedded-dock > .dock-body > .dock-main > .dock-content > .dock-panel {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.embedded-dock > .dock-body > .dock-main > .dock-content > .dock-panel.active {
+    display: flex;
+}
+
+.embedded-dock .tab-close {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #bbb;
+    font-size: 10px;
+    line-height: 1;
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+}
+
+.embedded-dock .tab-close:hover {
+    background: #fcc;
+    color: #c00;
+}
+
+/* Sub-mode buttons - only visible in embedded docks */
+.embedded-sub-mode {
+    display: flex;
+    gap: 2px;
+    margin-right: 6px;
+    padding-right: 6px;
+    border-right: 1px solid #ccc;
+}
+
+.embedded-sub-mode .dc-btn {
+    font-size: 10px;
+    width: auto;
+    padding: 0 6px;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.dh-float {
+    color: #4a90e2;
+    cursor: grab;
+}
+
+.dh-float:hover {
+    background: #d0e4ff;
+}
+
+.dh-float.active {
+    background: #4a90e2;
+    color: white;
+}
+
+.dh-float:active {
+    cursor: grabbing;
+}
+
+.dh-insert {
+    color: #e08040;
+    cursor: grab;
+}
+
+.dh-insert:hover {
+    background: #ffe8d8;
+}
+
+.dh-insert.active {
+    background: #e08040;
+    color: white;
+}
+
+.dh-insert:active {
+    cursor: grabbing;
+}
+
+/* Embedded dock resize handles */
+.embedded-resize-handle {
+    position: absolute;
+    background: transparent;
+    z-index: 502;
+    pointer-events: auto;
+}
+
+.embedded-resize-handle:hover {
+    background: rgba(74, 144, 226, 0.3);
+}
+
+.embedded-resize-handle.embedded-h {
+    height: 8px;
+    left: 0;
+    right: 0;
+    cursor: ns-resize;
+}
+
+.embedded-resize-handle.embedded-h.top { top: -4px; }
+.embedded-resize-handle.embedded-h.bottom { bottom: -4px; }
+
+.embedded-resize-handle.embedded-v {
+    width: 8px;
+    top: 0;
+    bottom: 0;
+    cursor: ew-resize;
+}
+
+.embedded-resize-handle.embedded-v.left { left: -4px; }
+.embedded-resize-handle.embedded-v.right { right: -4px; }

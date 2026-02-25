@@ -52,15 +52,19 @@ export class DockingSystem {
         /* ── Shared state ── */
         this.container       = document.getElementById(containerId);
         this.docks           = [];
+        this.embeddedDocks   = [];
 
         /* Drag state */
-        this.dragMode        = null;   // 'move' | 'tabify' | 'detach' | 'tab-move'
+        this.dragMode        = null;   // 'move' | 'tabify' | 'detach' | 'tab-move' | 'embed'
         this.draggedDock     = null;
         this.extractPanelIdx = null;
 
+        /* Embedded drag state */
+        this.embeddedDrag    = null;   // { dock, parentDock, mode, startX, startY, ... }
+
         /* Drop state */
         this.dropTarget      = null;
-        this.dropZone        = null;   // 'top' | 'bottom' | 'left' | 'right' | 'center'
+        this.dropZone        = null;   // 'top' | 'bottom' | 'left' | 'right' | 'center' | 'floating'
 
         /* Resize state */
         this.resizing        = null;   // set by splitter.startResize

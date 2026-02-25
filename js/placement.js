@@ -19,6 +19,12 @@
 import { rebuildDockUI }                              from './dock.js';
 import { mergeDockAsTab }                             from './tab-group.js';
 import { updateResizeHandles, updateConnectionPoints } from './splitter.js';
+import { 
+    performEmbed, 
+    showEmbedDropIndicators, 
+    hideEmbedDropIndicators,
+    getEmbedDropZone 
+} from './embedded.js';
 
 /* ══════════════════════════════════════════════════════════════════════════
    DRAG INITIATION
@@ -64,18 +70,31 @@ export function onMouseMove(sys, e) {
     );
 
     clearDropIndicators();
+    hideEmbedDropIndicators();
 
     if (tgt) {
         sys.dropTarget = tgt;
         const r        = tgt.getBoundingClientRect();
-        sys.dropZone   = getDropZone(
-            e.clientX - r.left,
-            e.clientY - r.top,
-            r.width,
-            r.height
-        );
         const isTabMode = sys.dragMode === 'tabify' || sys.dragMode === 'tab-move';
-        showDropIndicator(tgt, sys.dropZone, isTabMode);
+        const isEmbedMode = sys.dragMode === 'embed';
+        
+        if (isEmbedMode) {
+            sys.dropZone = getEmbedDropZone(
+                e.clientX - r.left,
+                e.clientY - r.top,
+                r.width,
+                r.height
+            );
+            showEmbedDropIndicators(tgt, sys.dropZone);
+        } else {
+            sys.dropZone = getDropZone(
+                e.clientX - r.left,
+                e.clientY - r.top,
+                r.width,
+                r.height
+            );
+            showDropIndicator(tgt, sys.dropZone, isTabMode);
+        }
     } else {
         sys.dropTarget = null;
         sys.dropZone   = null;
@@ -95,6 +114,7 @@ export function onMouseUp(sys) {
             case 'tabify':   performTabify(sys);   break;
             case 'detach':   performDetach(sys);   break;
             case 'tab-move': performTabMove(sys);  break;
+            case 'embed':    performEmbed(sys);    break;
         }
     }
 
@@ -104,6 +124,7 @@ export function onMouseUp(sys) {
     }
 
     clearDropIndicators();
+    hideEmbedDropIndicators();
     sys.dragMode        = null;
     sys.dropTarget      = null;
     sys.dropZone        = null;

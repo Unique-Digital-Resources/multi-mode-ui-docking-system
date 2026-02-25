@@ -16,6 +16,10 @@
 import { showDockHeaders, hideDockHeaders, hideAllDockHeaders } from './header.js';
 import { onMouseMove, onMouseUp }                               from './placement.js';
 import { handleResize, updateConnectionPoints }                  from './splitter.js';
+import { 
+    handleEmbeddedDragMove, 
+    handleEmbeddedDragEnd 
+} from './embedded.js';
 
 /* ══════════════════════════════════════════════════════════════════════════
    PUBLIC INIT
@@ -46,32 +50,30 @@ export function initShortcuts(sys) {
 function _initMouseListeners(sys) {
     document.addEventListener('mousemove', (e) => {
         if (sys.resizing) {
-            // Delegated to splitter.js
             handleResize(sys, e);
             return;
         }
+        if (sys.embeddedDrag) {
+            handleEmbeddedDragMove(sys, e);
+            return;
+        }
         if (sys.dragMode) {
-            // Delegated to placement.js (updates drop-indicator highlights)
             onMouseMove(sys, e);
         }
     });
 
-    /**
-     * Unified mouseup handler.
-     * Priority: finalise resize → finalise drag-drop.
-     *
-     * Triggered on: document mouseup
-     */
     document.addEventListener('mouseup', () => {
         if (sys.resizing) {
-            // Clean up resize state
             sys.resizing.handle.classList.remove('resizing');
             sys.resizing = null;
             updateConnectionPoints(sys);
             return;
         }
+        if (sys.embeddedDrag) {
+            handleEmbeddedDragEnd(sys);
+            return;
+        }
         if (sys.dragMode) {
-            // Delegated to placement.js (performs the actual layout change)
             onMouseUp(sys);
         }
     });
