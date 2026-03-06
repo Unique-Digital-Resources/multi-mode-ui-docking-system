@@ -3,111 +3,221 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Docking System — Component Test</title>
-<link rel="stylesheet" href="css/dock.css">
-<style>
-  /* ── Test harness extras ─────────────────────────────── */
-  #toolbar {
-    position: fixed; top: 10px; right: 12px; z-index: 9999;
-    display: flex; gap: 6px; flex-direction: column; align-items: flex-end;
-  }
-  .tb-btn {
-    background: rgba(20,20,40,.82); color: #e8e8f0;
-    border: 1px solid rgba(255,255,255,.15);
-    padding: 5px 12px; border-radius: 4px; font-size: 11px;
-    cursor: pointer; backdrop-filter: blur(4px);
-    transition: background .15s;
-  }
-  .tb-btn:hover { background: rgba(60,80,180,.9); }
-  #tb-legend {
-    background: rgba(20,20,40,.78); color: #b0b8cc;
-    border: 1px solid rgba(255,255,255,.12); border-radius: 6px;
-    padding: 8px 12px; font-size: 10px; line-height: 1.7;
-    backdrop-filter: blur(4px); max-width: 220px; text-align: right;
-  }
-  #tb-legend strong { color: #c8d4ff; display: block; margin-bottom: 3px; }
-  kbd {
-    background: #3a3a5a; color: #dde; padding: 1px 5px;
-    border-radius: 3px; font-family: monospace; font-size: 10px;
-  }
-</style>
+<title>Docking System</title>
+<link rel="stylesheet" href="src/styles.css">
 </head>
 <body>
 
-<!-- Root container – DockingSystem will fill this -->
 <div id="docking-container"></div>
 
-<!-- Ctrl hint toast (referenced by shortcuts.js) -->
-<div id="ctrl-hint">Press <kbd>Ctrl</kbd> while hovering a dock to toggle controls</div>
-
-<!-- Test toolbar -->
-<div id="toolbar">
-  <div id="tb-legend">
-    <strong>How to use</strong>
-    Hover a dock, press <kbd>Ctrl</kbd><br>
-    ☰ Move   — drag to reposition<br>
-    ⊞ Tab    — drag to merge as tab<br>
-    📦 Embed — drag to embed inside<br>
-    ▼ Collapse — collapse dock/tab group<br>
-    ✕ Remove — close panel / dock<br>
-    ⊟ Ungroup — split tabs apart<br>
-    Drag resize handles to resize<br>
-    Drag ● connection points (2-axis)
+<!-- ═══ TEST PANEL ═══ -->
+<div id="test-panel">
+  <div id="test-panel-hdr">
+    <span id="test-panel-title">⚙ Test Panel</span>
+    <button id="test-panel-toggle" title="Collapse">▲</button>
   </div>
-  <button class="tb-btn" id="btn-add-dock">＋ Add Dock</button>
-  <button class="tb-btn" id="btn-add-tabbed">＋ Add Tabbed Dock</button>
-  <button class="tb-btn" id="btn-add-panel">＋ Panel to first dock</button>
+  <div id="test-panel-body">
+
+    <div class="tp-group">
+      <div class="tp-group-label">Add Dock</div>
+      <div class="tp-row">
+        <button class="tp-btn primary" onclick="addDock()">+ Dock</button>
+        <button class="tp-btn primary" onclick="addDockWithTabs()">+ Tabbed</button>
+      </div>
+    </div>
+
+    <div class="tp-sep"></div>
+
+    <div class="tp-group">
+      <div class="tp-group-label">Embed into Dock 1</div>
+      <div class="tp-row">
+        <button class="tp-btn" onclick="addEmbedFloat(0)" title="Add free-floating embedded dock to dock 1">Float</button>
+        <button class="tp-btn" onclick="addEmbedToZone(0,'top')" title="Embed into top zone of dock 1">Top</button>
+        <button class="tp-btn" onclick="addEmbedToZone(0,'bottom')">Bot</button>
+      </div>
+      <div class="tp-row">
+        <button class="tp-btn" onclick="addEmbedToZone(0,'left')">Left</button>
+        <button class="tp-btn" onclick="addEmbedToZone(0,'right')">Right</button>
+        <button class="tp-btn" onclick="addEmbedGroup(0)" title="Add tab group to bottom zone">Group</button>
+      </div>
+    </div>
+
+    <div class="tp-sep"></div>
+
+    <div class="tp-group">
+      <div class="tp-group-label">Embed into Dock 2</div>
+      <div class="tp-row">
+        <button class="tp-btn" onclick="addEmbedFloat(1)">Float</button>
+        <button class="tp-btn" onclick="addEmbedToZone(1,'top')">Top</button>
+        <button class="tp-btn" onclick="addEmbedToZone(1,'bottom')">Bot</button>
+      </div>
+      <div class="tp-row">
+        <button class="tp-btn" onclick="addEmbedToZone(1,'left')">Left</button>
+        <button class="tp-btn" onclick="addEmbedToZone(1,'right')">Right</button>
+      </div>
+    </div>
+
+    <div class="tp-sep"></div>
+
+    <div class="tp-group">
+      <div class="tp-group-label">Layout</div>
+      <button class="tp-btn" onclick="resetLayout()">↺ Reset Layout</button>
+      <button class="tp-btn" onclick="logState()">📋 Log State</button>
+    </div>
+
+    <div class="tp-sep"></div>
+
+    <div class="tp-group">
+      <div class="tp-group-label">Info</div>
+      <div style="font-size:9px;color:#3d4252;line-height:1.6;padding:2px 0;">
+        <b style="color:#5a6070">Drag ☰</b> = move dock<br>
+        <b style="color:#5a6070">Ctrl+Drag</b> = tab into dock<br>
+        <b style="color:#5a6070">Shift+Drag</b> = embed into dock<br>
+        <b style="color:#5a6070">⠿</b> = free float embed panel<br>
+        <b style="color:#5a6070">⊞</b> = dock embed panel to zone<br>
+        <b style="color:#5a6070">↗</b> = detach tab from group
+      </div>
+    </div>
+
+  </div>
 </div>
 
-<script type="module">
-  import { DockingSystem } from './js/main.js';
+<div id="embed-ghost"></div>
 
-  /* ── Instantiate the component ───────────────────────────────────────── */
-  const sys = new DockingSystem('docking-container');
+<!-- Scripts in dependency order -->
+<script src="src/utils.js"></script>
+<script src="src/dom-builder.js"></script>
+<script src="src/dock-manager.js"></script>
+<script src="src/panel-manager.js"></script>
+<script src="src/embed-manager.js"></script>
+<script src="src/drag-drop.js"></script>
+<script src="src/resize-manager.js"></script>
+<script src="src/connection-points.js"></script>
+<script src="src/DockingSystem.js"></script>
+<script src="src/index.js"></script>
 
-  /* ── Test toolbar actions ────────────────────────────────────────────── */
+<script>
+/* ── Init ─────────────────────────────── */
+const dockingSystem = new DockingSystem('docking-container');
+window.dockingSystem = dockingSystem;
 
-  // Add a plain dock with a single panel
-  document.getElementById('btn-add-dock').addEventListener('click', () => {
-    sys.addDock(null, [
-      sys.createPanel(
-        `Dock ${sys.dockCounter}`,
-        `<div class="dock-card">Dynamically added dock #${sys.dockCounter}</div>`
-      ),
-    ]);
+/* ── Test panel drag ───────────────────── */
+(function() {
+  const panel = document.getElementById('test-panel');
+  const hdr   = document.getElementById('test-panel-hdr');
+  const toggle = document.getElementById('test-panel-toggle');
+  let ox = 0, oy = 0;
+
+  hdr.addEventListener('mousedown', e => {
+    if (e.target === toggle) return;
+    e.preventDefault();
+    const r = panel.getBoundingClientRect();
+    ox = e.clientX - r.left; oy = e.clientY - r.top;
+    const mv = ev => {
+      panel.style.right = 'auto';
+      panel.style.left = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  ev.clientX - ox)) + 'px';
+      panel.style.top  = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, ev.clientY - oy)) + 'px';
+    };
+    const up = () => { document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); };
+    document.addEventListener('mousemove', mv);
+    document.addEventListener('mouseup', up);
   });
 
-  // Add a dock that already has two tabs
-  document.getElementById('btn-add-tabbed').addEventListener('click', () => {
-    const n = sys.dockCounter + 1;
-    sys.addDock(null, [
-      sys.createPanel(`Alpha ${n}`, `<div class="dock-card">Tab Alpha in dock ${n}</div>`),
-      sys.createPanel(`Beta ${n}`,  `<div class="dock-card">Tab Beta in dock ${n}</div>`),
-    ], 'top');
+  let collapsed = false;
+  toggle.addEventListener('click', () => {
+    collapsed = !collapsed;
+    panel.classList.toggle('collapsed', collapsed);
+    toggle.textContent = collapsed ? '▼' : '▲';
   });
+})();
 
-  // Programmatically push a new panel into the first existing dock
-  document.getElementById('btn-add-panel').addEventListener('click', () => {
-    const firstDock = sys.docks[0];
-    if (!firstDock) return;
-    const panel = sys.createPanel(
-      `Dynamic ${sys.panelCounter + 1}`,
-      `<div class="dock-card">Programmatic panel #${sys.panelCounter + 1}</div>`
-    );
-    firstDock.panelData.push(panel);
-    firstDock.activePanelIndex = firstDock.panelData.length - 1;
+/* ── Test helper functions ─────────────── */
+let panelSeq = 10;
 
-    // rebuildDockUI is not part of the public API but is re-exported by dock.js
-    // for advanced use; import it only when needed.
-    import('./js/dock.js').then(({ rebuildDockUI }) => {
-      rebuildDockUI(sys, firstDock);
-      // Re-run splitter after a structural change
-      import('./js/splitter.js').then(({ updateResizeHandles, updateConnectionPoints }) => {
-        updateResizeHandles(sys);
-        updateConnectionPoints(sys);
-      });
-    });
+function getFirstDock(idx) {
+  return dockingSystem.docks[idx || 0] || dockingSystem.docks[0];
+}
+
+function addDock() {
+  const n = ++panelSeq;
+  const panel = dockingSystem.mkPanel(`Panel ${n}`, `<div class="dock-card">Panel ${n}</div>`);
+  dockingSystem.addDock([panel], 'top');
+  dockingSystem.updateResizeHandles();
+  dockingSystem.updateConnectionPoints();
+}
+
+function addDockWithTabs() {
+  const n1 = ++panelSeq, n2 = ++panelSeq;
+  const p1 = dockingSystem.mkPanel(`Tab ${n1}`, `<div class="dock-card">Tab ${n1}</div>`);
+  const p2 = dockingSystem.mkPanel(`Tab ${n2}`, `<div class="dock-card">Tab ${n2}</div>`);
+  const dock = dockingSystem.addDock([p1, p2], 'top');
+  dockingSystem.updateResizeHandles();
+  dockingSystem.updateConnectionPoints();
+}
+
+function addEmbedFloat(dockIdx) {
+  const dock = dockingSystem.docks[dockIdx];
+  if (!dock) return;
+  const n = ++panelSeq;
+  EmbedManager.addFloat(dock, 'Float ' + n);
+}
+
+function addEmbedToZone(dockIdx, side) {
+  const dock = dockingSystem.docks[dockIdx];
+  if (!dock) return;
+  const n = ++panelSeq;
+  const slot = { id: EmbedManager.uid(), type: 'card', title: 'Embed ' + n };
+  EmbedManager._dockTo(dock, slot, side, 'last');
+  EmbedManager.renderZone(dock, side);
+  EmbedManager._updateCorners(dock);
+}
+
+function addEmbedGroup(dockIdx) {
+  const dock = dockingSystem.docks[dockIdx];
+  if (!dock) return;
+  const n1 = ++panelSeq, n2 = ++panelSeq;
+  const tg = {
+    id: EmbedManager.uid(),
+    type: 'tabgroup',
+    tabs: [
+      { id: EmbedManager.uid(), title: 'Tab ' + n1 },
+      { id: EmbedManager.uid(), title: 'Tab ' + n2 },
+    ],
+    activeId: null
+  };
+  tg.activeId = tg.tabs[0].id;
+  EmbedManager._dockTo(dock, tg, 'bottom', 'last');
+  EmbedManager.renderZone(dock, 'bottom');
+  EmbedManager._updateCorners(dock);
+}
+
+function resetLayout() {
+  // Destroy and re-create
+  dockingSystem.destroy();
+  const c = document.getElementById('docking-container');
+  c.innerHTML = '';
+  dockingSystem.docks = [];
+  dockingSystem.dockCounter = 0;
+  DockManager.createDock(dockingSystem, c);
+  DockManager.createDock(dockingSystem, c);
+  DockManager.createDock(dockingSystem, c);
+  dockingSystem.updateResizeHandles();
+  dockingSystem.updateConnectionPoints();
+}
+
+function logState() {
+  const info = dockingSystem.docks.map((d, i) => {
+    const es = d.embedState;
+    const zones = es ? Object.entries(es.zones).map(([s, z]) =>
+      z.slots.length ? `${s}:${z.slots.length}` : null
+    ).filter(Boolean).join(', ') : 'none';
+    const floats = es ? es.floats.length : 0;
+    return `Dock ${i+1}: panels=${d.panelData.length}, zones=[${zones}], floats=${floats}`;
   });
+  console.log('=== Docking State ===\n' + info.join('\n'));
+  alert(info.join('\n'));
+}
 </script>
+
 </body>
 </html>
