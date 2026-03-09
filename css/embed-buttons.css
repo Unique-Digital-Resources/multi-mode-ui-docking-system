@@ -1,0 +1,45 @@
+/* ══════════════════════════════════════
+   EMBED BUTTONS
+   All icon buttons that appear on
+   embedded cards, tab groups and zone
+   containers: base .ec-btn, size
+   variant, and each semantic button.
+══════════════════════════════════════ */
+
+/* ── Base button ── */
+.ec-btn {
+    border: none; background: transparent; color: #bbb;
+    border-radius: 3px; cursor: grab;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; line-height: 1; flex-shrink: 0;
+    transition: background .1s, color .1s;
+    font-family: monospace; font-weight: 700; padding: 0;
+    width: 22px; height: 22px;
+}
+.ec-btn:hover  { background: rgba(0,0,0,.07); color: #444; }
+.ec-btn:active { color: #4a90d9; }
+
+/* Small variant used in group/container headers */
+.ec-b-small { width: 18px; height: 18px; font-size: 11px; }
+
+/* ── ⊞ Dock-to-zone button ── */
+.ec-b-dock       { color: rgba(74,144,217,.4); }
+.ec-b-dock:hover { background: rgba(74,144,217,.08); color: #4a90d9; }
+
+/* ── ↗ Untab button ── */
+.ec-b-untab       { font-size: 10px; color: #ccc; cursor: pointer; }
+.ec-b-untab:hover { background: rgba(74,144,217,.10); color: #4a90d9; }
+
+/* ── ☰ Move button (eject to real dock) ── */
+.ec-b-move        { cursor: grab; color: rgba(100,160,220,.45); }
+.ec-b-move:hover  { background: rgba(74,144,217,.12); color: #4a90d9; }
+.ec-b-move:active { cursor: grabbing; color: #2266bb; }
+
+/* ── ⊟ Ungroup button ── */
+.ec-b-ungroup       { color: rgba(240,192,96,.5); font-size: 12px; cursor: pointer; }
+.ec-b-ungroup:hover { background: rgba(240,192,96,.15); color: #c8920a; }
+
+/* ── ⊞ Embed/merge container button ── */
+.ec-b-zc-embed        { cursor: grab; color: rgba(80,200,140,.45); }
+.ec-b-zc-embed:hover  { background: rgba(80,200,140,.12); color: #44bb88; }
+.ec-b-zc-embed:active { cursor: grabbing; color: #22994d; }

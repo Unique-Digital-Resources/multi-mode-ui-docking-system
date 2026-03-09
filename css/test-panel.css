@@ -1,0 +1,62 @@
+/* ══════════════════════════════════════
+   TEST PANEL
+   Floating collapsible dev/debug panel
+   fixed to the top-right corner. All
+   .tp-* classes belong to this widget.
+══════════════════════════════════════ */
+
+#test-panel {
+    position: fixed; top: 18px; right: 18px; z-index: 10000;
+    width: 240px;
+    background: #1c1e26;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.45);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 11px; color: #c2c6cf;
+    user-select: none;
+    overflow: hidden;
+}
+#test-panel-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 10px; background: #13141a;
+    cursor: grab; border-bottom: 1px solid rgba(255,255,255,.07);
+}
+#test-panel-hdr:active { cursor: grabbing; }
+#test-panel-title {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: #6b7280;
+}
+#test-panel-toggle {
+    border: none; background: transparent; color: #555; cursor: pointer;
+    font-size: 14px; line-height: 1; padding: 0 2px;
+}
+#test-panel-toggle:hover { color: #c2c6cf; }
+#test-panel-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+#test-panel.collapsed #test-panel-body { display: none; }
+
+/* ── Groups and labels ── */
+.tp-group       { display: flex; flex-direction: column; gap: 3px; }
+.tp-group-label {
+    font-size: 9px; text-transform: uppercase; letter-spacing: 1px;
+    color: #3d4252; padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,.04);
+    margin-bottom: 1px;
+}
+
+/* ── Buttons ── */
+.tp-btn {
+    border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.04);
+    color: #9ba3af; border-radius: 4px; padding: 5px 8px;
+    cursor: pointer; font-size: 10px; text-align: left;
+    transition: background .1s, color .1s, border-color .1s;
+    font-family: inherit;
+}
+.tp-btn:hover   { background: rgba(255,255,255,.10); color: #e2e8f0; border-color: rgba(255,255,255,.18); }
+.tp-btn:active  { background: rgba(74,144,217,.20); border-color: #4a90d9; color: #4a90d9; }
+.tp-btn.primary { border-color: rgba(74,144,217,.3); color: #7ab4e8; }
+.tp-btn.primary:hover { background: rgba(74,144,217,.15); color: #4a90d9; }
+
+/* ── Layout helpers ── */
+.tp-row          { display: flex; gap: 4px; }
+.tp-row .tp-btn  { flex: 1; text-align: center; }
+.tp-sep          { height: 1px; background: rgba(255,255,255,.05); margin: 2px 0; }

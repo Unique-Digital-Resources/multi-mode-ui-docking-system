@@ -1,0 +1,59 @@
+/* ══════════════════════════════════════
+   DOCK TABS BAR
+   Scrollable tab strip, tab items, close
+   button. Adapts to top/bottom/left/right
+   tab positions via data-tabs-pos.
+══════════════════════════════════════ */
+
+.dock-tabs-bar {
+    display: flex; flex-shrink: 0; background: #f2f2f2; scrollbar-width: none;
+}
+.dock-tabs-bar::-webkit-scrollbar { display: none; }
+.dock-tabs-bar.ctrl-hidden { display: none !important; }
+
+/* Horizontal bars */
+.dock[data-tabs-pos="top"]    > .dock-body > .dock-tabs-bar,
+.dock[data-tabs-pos="bottom"] > .dock-body > .dock-tabs-bar {
+    flex-direction: row; overflow-x: auto; border-bottom: 1px solid #d8d8d8;
+}
+.dock[data-tabs-pos="bottom"] > .dock-body > .dock-tabs-bar {
+    border-bottom: none; border-top: 1px solid #d8d8d8;
+}
+
+/* Vertical bars */
+.dock[data-tabs-pos="left"]  > .dock-body > .dock-tabs-bar,
+.dock[data-tabs-pos="right"] > .dock-body > .dock-tabs-bar {
+    flex-direction: column; width: 90px; overflow-y: auto; border-right: 1px solid #d8d8d8;
+}
+.dock[data-tabs-pos="right"] > .dock-body > .dock-tabs-bar {
+    border-right: none; border-left: 1px solid #d8d8d8;
+}
+
+/* ── Tab item ── */
+.dock-tab {
+    display: flex; align-items: center; gap: 4px;
+    padding: 5px 9px; font-size: 11px; cursor: pointer;
+    white-space: nowrap; color: #777; flex-shrink: 0;
+    user-select: none; border-bottom: 2px solid transparent; transition: background .1s;
+}
+.dock-tab:hover  { background: #e6e6e6; }
+.dock-tab.active { background: white; color: #111; border-bottom-color: #444; }
+
+/* Vertical tab overrides */
+.dock[data-tabs-pos="left"]  > .dock-body > .dock-tabs-bar > .dock-tab,
+.dock[data-tabs-pos="right"] > .dock-body > .dock-tabs-bar > .dock-tab {
+    border-bottom: none; border-right: 2px solid transparent;
+    white-space: normal; word-break: break-word; width: 100%; padding: 7px 8px; font-size: 10px;
+}
+.dock[data-tabs-pos="left"]  > .dock-body > .dock-tabs-bar > .dock-tab.active { border-right-color: #444; }
+.dock[data-tabs-pos="right"] > .dock-body > .dock-tabs-bar > .dock-tab        { border-right: none; border-left: 2px solid transparent; }
+.dock[data-tabs-pos="right"] > .dock-body > .dock-tabs-bar > .dock-tab.active { border-left-color: #444; }
+
+/* ── Tab internals ── */
+.tab-title { flex: 1; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+.tab-close {
+    border: none; background: none; cursor: pointer; color: #bbb; font-size: 10px; line-height: 1;
+    width: 14px; height: 14px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; border-radius: 2px;
+}
+.tab-close:hover { background: #fcc; color: #c00; }

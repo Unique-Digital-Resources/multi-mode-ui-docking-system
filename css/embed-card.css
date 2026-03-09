@@ -1,0 +1,28 @@
+/* ══════════════════════════════════════
+   EMBEDDED CARD
+   Single embedded dock slot: shell,
+   header bar, title, and body area.
+══════════════════════════════════════ */
+
+.ec-embedded-dock {
+    display: flex; flex-direction: column;
+    border: 1px solid rgba(0,0,0,.10); border-radius: 5px;
+    background: #f5f5f8; overflow: hidden;
+    min-width: 55px; min-height: 34px; flex: 1;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+
+/* Card header */
+.ec-hdr {
+    display: flex; align-items: center; height: 25px;
+    background: #e8e9ef; border-bottom: 1px solid rgba(0,0,0,.08);
+    padding: 0 3px; gap: 1px; flex-shrink: 0;
+}
+.ec-title {
+    flex: 1; font-size: 10px; color: #666;
+    text-transform: uppercase; letter-spacing: .8px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 4px;
+}
+
+/* Card body */
+.ec-body { flex: 1; min-height: 0; overflow: hidden; background: #fafafa; }

@@ -1,0 +1,58 @@
+/* ══════════════════════════════════════
+   DROP INDICATORS
+   Visual feedback zones shown during
+   dock drag: normal split, tabify mode,
+   and embed mode.
+══════════════════════════════════════ */
+
+/* ── Base ── */
+.drop-indicator {
+    position: absolute; pointer-events: none; z-index: 900; display: none;
+}
+.drop-indicator.active { display: block; }
+.drop-indicator.top    { top:0;left:0;right:0;height:33%; background:rgba(220,50,50,.13);border:2px dashed #d44; }
+.drop-indicator.bottom { bottom:0;left:0;right:0;height:33%; background:rgba(240,140,0,.13);border:2px dashed #e90; }
+.drop-indicator.left   { top:0;left:0;bottom:0;width:33%; background:rgba(50,170,50,.13);border:2px dashed #4a4; }
+.drop-indicator.right  { top:0;right:0;bottom:0;width:33%; background:rgba(40,100,220,.13);border:2px dashed #46c; }
+.drop-indicator.center {
+    top:25%;left:25%;right:25%;bottom:25%;
+    background:rgba(140,60,200,.13);border:2px dashed #96c;border-radius:4px;
+}
+.drop-indicator.center::after {
+    content: '⇄ Swap';
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    font-size:10px;color:#806;font-weight:700;pointer-events:none;
+    white-space:nowrap;background:rgba(255,255,255,.85);padding:2px 6px;border-radius:3px;
+}
+
+/* ── Tabify mode — all 5 zones light up ── */
+.drop-indicator.tabify-zone {
+    display:block !important; border-style:solid !important; border-width:1.5px !important;
+    background:rgba(0,110,200,.06) !important; border-color:#2288cc !important;
+}
+.drop-indicator.tabify-zone.active-zone {
+    background:rgba(0,110,200,.24) !important; border-color:#005faa !important; border-width:2px !important;
+}
+.drop-indicator.tabify-zone::after {
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    font-size:10px;font-weight:700;color:#004e99;white-space:nowrap;pointer-events:none;
+    background:rgba(255,255,255,.9);padding:2px 7px;border-radius:3px;
+    letter-spacing:.03em;text-transform:uppercase;
+}
+.drop-indicator.center.tabify-zone::after { content:'⊞ Add Tab'    !important; color:#004e99 !important; }
+.drop-indicator.top.tabify-zone::after    { content:'⬆ Top Tabs'; }
+.drop-indicator.bottom.tabify-zone::after { content:'⬇ Bottom Tabs'; }
+.drop-indicator.left.tabify-zone::after   { content:'⬅ Left Tabs'; }
+.drop-indicator.right.tabify-zone::after  { content:'➡ Right Tabs'; }
+
+/* ── Embed mode — orange ── */
+.drop-indicator.embed-zone {
+    display:block !important; border-style:solid !important; border-width:2px !important;
+    background:rgba(255,140,0,.12) !important; border-color:#e07700 !important;
+}
+.drop-indicator.embed-zone::after {
+    content: '⊟ Embed';
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    font-size:10px;font-weight:700;color:#7a4200;white-space:nowrap;pointer-events:none;
+    background:rgba(255,255,255,.9);padding:2px 7px;border-radius:3px;
+}

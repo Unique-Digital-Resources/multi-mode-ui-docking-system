@@ -1,0 +1,98 @@
+/* ══════════════════════════════════════
+   EMBED SYSTEM LAYERS
+   Stacking architecture inside .dock:
+     z=10  .ez           — zone strips
+     z=11  .ez-rh        — zone resize handles
+     (dyn) .ez-float-layer children — free floats
+     z=900 .ez-drop-overlay — drag overlay
+══════════════════════════════════════ */
+
+/* ── Zone strips — absolutely positioned inside .dock ── */
+/* z-index NOT set here; JS sets it dynamically via bringToTop()
+   so zones and floats share the same stacking context. */
+.ez {
+    position: absolute;
+    display: flex; overflow: hidden;
+    background: transparent;
+    gap: 5px;
+}
+.ez.ax-h { flex-direction: row; left: 0; right: 0; align-items: stretch; }
+.ez.side-top    { top: 0;    padding: 6px 6px 0;   z-index: 10; }
+.ez.side-bottom { bottom: 0; padding: 0 6px 6px;   z-index: 10; }
+.ez.ax-v { flex-direction: column; top: 0; bottom: 0; align-items: stretch; }
+.ez.side-left  { left: 0;  padding: 6px 0 6px 6px; z-index: 10; }
+.ez.side-right { right: 0; padding: 6px 6px 6px 0; z-index: 10; }
+
+/* ── Zone edge resize handles ── */
+/* z:11 default — just above zone (10). When a zone is raised by bringToTop
+   it exceeds 100, but the rh stays visually within its zone. */
+.ez-rh { position: absolute; z-index: 11; }
+.ez-rh.rh-h { height: 5px; cursor: row-resize; }
+.ez-rh.rh-v { width:  5px; cursor: col-resize; }
+.ez-rh.side-top,
+.ez-rh.side-bottom { left: 0; right: 0; }
+.ez-rh.side-left,
+.ez-rh.side-right  { top: 0; bottom: 0; }
+.ez-rh::after {
+    content: ''; position: absolute; inset: 1px; border-radius: 2px;
+    background: transparent; transition: background .15s;
+}
+.ez-rh.rh-h::after { inset: 1px 35px; }
+.ez-rh.rh-v::after { inset: 35px 1px; }
+.ez-rh:hover::after,
+.ez-rh.active::after { background: #4dabf7; opacity: .5; }
+
+/* ── Float layer ── */
+/* No z-index — children get individual z from JS so floats can be
+   raised above zone strips in the same stacking context. */
+.ez-float-layer {
+    position: absolute; inset: 0;
+    pointer-events: none;
+}
+.ez-float-layer > * { pointer-events: all; }
+
+/* ── Drop overlay (shown during embed drag) ── */
+.ez-drop-overlay {
+    position: absolute; inset: 0;
+    pointer-events: none; z-index: 900; display: none;
+}
+.ez-drop-overlay.show { display: block; pointer-events: all; }
+
+/* ── Overlay drop zones — orange theme ── */
+.ez-dz {
+    position: absolute; display: flex;
+    border-radius: 5px; transition: background .1s;
+}
+.ez-dz.dz-empty {
+    background: rgba(255,140,0,.05);
+    border: 1.5px dashed rgba(255,140,0,.30);
+    align-items: center; justify-content: center;
+    font-size: 9px; font-family: monospace; font-weight: 700;
+    letter-spacing: 1.5px; color: rgba(255,140,0,.35);
+}
+.ez-dz.dz-center {
+    background: rgba(255,140,0,.04);
+    border: 1.5px dashed rgba(255,140,0,.22);
+    color: rgba(255,140,0,.35);
+    align-items: center; justify-content: center;
+    font-size: 9px; font-family: monospace; font-weight: 700;
+    letter-spacing: 1.2px;
+}
+.ez-dz.dz-empty.hl,
+.ez-dz.dz-center.hl {
+    background: rgba(255,140,0,.18); border-color: #e07700;
+    border-style: solid; color: #c05f00;
+}
+.ez-dz.dz-has { background: transparent; border: none; }
+
+.ez-dz-sub {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    border-radius: 4px; border: 1.5px dashed rgba(255,140,0,.25);
+    font-size: 8px; font-family: monospace; font-weight: 700;
+    letter-spacing: 1px; color: rgba(255,140,0,.30); transition: all .1s;
+}
+.ez-dz-sub.sub-tab { flex: 0.75; }
+.ez-dz-sub.hl {
+    background: rgba(255,140,0,.18); border-color: #e07700;
+    border-style: solid; color: #c05f00;
+}

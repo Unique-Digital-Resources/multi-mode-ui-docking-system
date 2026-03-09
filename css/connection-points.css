@@ -1,0 +1,12 @@
+/* ══════════════════════════════════════
+   CONNECTION POINTS
+   Fixed-position dot indicators shown
+   at dock edges for connection actions.
+══════════════════════════════════════ */
+
+.connection-point {
+    position: fixed; width: 10px; height: 10px;
+    background: #999; border: 2px solid white;
+    border-radius: 50%; z-index: 200; pointer-events: all;
+    box-shadow: 0 0 0 1px #bbb;
+}

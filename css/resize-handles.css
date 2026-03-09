@@ -1,0 +1,12 @@
+/* ══════════════════════════════════════
+   RESIZE HANDLES (dock layout splitters)
+   z:200 — must stay ABOVE all embed
+   layers (z:10/11/50/800) so splitters
+   remain grabbable at all times.
+══════════════════════════════════════ */
+
+.resize-handle { position: absolute; background: transparent; z-index: 200; }
+.resize-handle:hover,
+.resize-handle.resizing { background: #b0b0b0; }
+.resize-handle.vertical   { width:4px; height:100%; right:-2px; top:0; cursor:ew-resize; }
+.resize-handle.horizontal { height:4px; width:100%; bottom:-2px; left:0; cursor:ns-resize; }

@@ -4,7 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Docking System</title>
-<link rel="stylesheet" href="src/styles.css">
+
+
+<!-- 1. Foundation -->
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/hint.css">
+
+<!-- 2. Dock shell & chrome -->
+<link rel="stylesheet" href="css/dock-layout.css">
+<link rel="stylesheet" href="css/dock-header.css">
+<link rel="stylesheet" href="css/dock-tabs.css">
+
+<!-- 3. Interaction feedback -->
+<link rel="stylesheet" href="css/drop-indicators.css">
+<link rel="stylesheet" href="css/resize-handles.css">
+<link rel="stylesheet" href="css/connection-points.css">
+
+<!-- 4. Embed system layers -->
+<link rel="stylesheet" href="css/embed-layers.css">
+
+<!-- 5. Embedded slot types -->
+<link rel="stylesheet" href="css/embed-card.css">
+<link rel="stylesheet" href="css/embed-tabgroup.css">
+<link rel="stylesheet" href="css/embed-container.css">
+
+<!-- 6. Embed interaction -->
+<link rel="stylesheet" href="css/embed-buttons.css">
+<link rel="stylesheet" href="css/embed-floating.css">
+<link rel="stylesheet" href="css/embed-ghost.css">
+
+<!-- 7. Dev/debug -->
+<link rel="stylesheet" href="css/test-panel.css">
+
 </head>
 <body>
 
@@ -85,16 +116,28 @@
 <div id="embed-ghost"></div>
 
 <!-- Scripts in dependency order -->
-<script src="src/utils.js"></script>
-<script src="src/dom-builder.js"></script>
-<script src="src/dock-manager.js"></script>
-<script src="src/panel-manager.js"></script>
-<script src="src/embed-manager.js"></script>
-<script src="src/drag-drop.js"></script>
-<script src="src/resize-manager.js"></script>
-<script src="src/connection-points.js"></script>
-<script src="src/DockingSystem.js"></script>
-<script src="src/index.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/dom-builder.js"></script>
+<script src="js/dock-manager.js"></script>
+<script src="js/panel-manager.js"></script>
+
+<script src="js/embed-core.js"></script>
+<script src="js/embed-resize.js"></script>
+<script src="js/embed-ghost.js"></script>
+<script src="js/embed-slots.js"></script>
+<script src="js/embed-overlay.js"></script>
+<script src="js/embed-render.js"></script>
+<script src="js/embed-builders.js"></script>
+<script src="js/embed-drag-free.js"></script>
+<script src="js/embed-drag-dock.js"></script>
+<script src="js/embed-drag-move.js"></script>
+<script src="js/embed-manager.js"></script>
+
+<script src="js/drag-drop.js"></script>
+<script src="js/resize-manager.js"></script>
+<script src="js/connection-points.js"></script>
+<script src="js/DockingSystem.js"></script>
+<script src="js/index.js"></script>
 
 <script>
 /* ── Init ─────────────────────────────── */
