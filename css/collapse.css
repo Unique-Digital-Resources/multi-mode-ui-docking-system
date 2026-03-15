@@ -1,0 +1,336 @@
+/* ════════════════════════════════════════════════════════
+   collapse.css
+
+   §1  DOCK COLLAPSE     (.dock-collapsed)
+       • Single-panel dock → collapsed by dh-collapse button
+       • Multi-panel dock  → collapsed by tgh-collapse button
+         (individual tabs are NOT collapseable; the whole group collapses)
+       dock-clps-h  — dock lives in a row   → 32 px wide strip
+       dock-clps-v  — dock lives in a column → 32 px tall bar
+
+   §2  ZONE-EMBEDDED SLOT COLLAPSE   (.ec-slot-collapsed)
+       • Direct zone children only.  Cards / tab-groups inside a
+         container, and cards inside a tab-group, are NOT given
+         collapse buttons; their parent container collapses them.
+       ec-clps-h  — left/right zone items  → shrink HEIGHT to 26 px
+       ec-clps-v  — top/bottom zone items  → shrink WIDTH  to 26 px
+
+   §3  FLOATING SLOT COLLAPSE   (.ec-float-clps-h / .ec-float-clps-v)
+       • Top-level floats only (same parent-only rule as §2).
+       • "Header only visible" — body + tab-bar hidden, only the
+         control header remains visible.
+       • H and V are independent and can combine.
+       ec-float-clps-v  — height → MIN_FLOAT px (30)
+       ec-float-clps-h  — width  → MIN_FLOAT px (30)
+════════════════════════════════════════════════════════ */
+
+
+/* ══════════════════════════════════════════════════════
+   §1  DOCK COLLAPSE
+══════════════════════════════════════════════════════ */
+
+/* ── Shared: hide body + drop indicators when collapsed ── */
+.dock.dock-collapsed > .dock-body      { display: none !important; }
+.dock.dock-collapsed > .drop-indicator { display: none !important; }
+
+/* ── Headers pinned visible by JS (_collapseDock adds .clps-pinned) ── */
+.dock-header.clps-pinned,
+.tabs-group-header.clps-pinned { display: flex !important; }
+
+/* ── Collapse button appearance ── */
+.dh-collapse       { font-size: 9px; color: #999; }
+.dh-collapse:hover { color: #333; }
+.tgh-collapse       { font-size: 9px; }
+.tgh-collapse:hover { background: rgba(255,255,255,.30); }
+
+/* ─────────────────────────────────────────────────
+   §1a  VERTICAL collapse  (dock in column → short bar)
+───────────────────────────────────────────────── */
+.dock.dock-collapsed.dock-clps-v {
+    /* JS already sets flex: 0 0 32px — guard against min-height override */
+    min-height: 0 !important;
+    overflow: hidden;
+}
+/* Header stays horizontal; no structural change needed */
+
+/* ─────────────────────────────────────────────────
+   §1b  HORIZONTAL collapse  (dock in row → narrow strip)
+───────────────────────────────────────────────── */
+.dock.dock-collapsed.dock-clps-h {
+    min-width: 0 !important;
+    overflow: hidden;
+}
+
+/* Rotate the pinned header into a 32 px wide vertical strip */
+.dock.dock-collapsed.dock-clps-h > .dock-header.clps-pinned,
+.dock.dock-collapsed.dock-clps-h > .tabs-group-header.clps-pinned {
+    flex-direction: column;
+    width: 32px;
+    height: 100%;
+    padding: 6px 3px;
+    overflow: hidden;
+    gap: 4px;
+    align-items: center;
+    justify-content: flex-start;
+    border-bottom: none;
+    border-right: 1px solid #d4d4d4;
+    box-sizing: border-box;
+}
+.dock.dock-collapsed.dock-clps-h > .tabs-group-header.clps-pinned {
+    background: #1a1a2e;
+    border-right: 1px solid rgba(255,255,255,.10);
+}
+
+/* Rotate title / label text vertically */
+.dock.dock-collapsed.dock-clps-h .dock-title {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-height: 160px;
+    padding: 3px 0;
+}
+.dock.dock-collapsed.dock-clps-h .tgh-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-height: 120px;
+    font-size: 9px;
+    padding: 3px 0;
+}
+
+/* Stack control buttons in the vertical strip */
+.dock.dock-collapsed.dock-clps-h .dock-controls {
+    flex-direction: column;
+    gap: 2px;
+}
+.dock.dock-collapsed.dock-clps-h .tgh-controls {
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+    width: 100%;
+}
+/* Compact tgh-btn in the strip */
+.dock.dock-collapsed.dock-clps-h .tgh-btn {
+    padding: 3px 4px;
+    font-size: 10px;
+    height: auto;
+    overflow: hidden;
+    max-width: 26px;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   §2  ZONE-EMBEDDED SLOT COLLAPSE
+
+   Orientation (matches CollapseManager._zoneAxis):
+     ec-clps-v  — top / bottom zones — HEIGHT shrinks to 26 px
+                  ▲/▼ arrows
+                  top zone:    align-self flex-start → strip stays at TOP    ✓
+                  bottom zone: align-self flex-end   → strip stays at BOTTOM ✓
+
+     ec-clps-h  — left / right zones — WIDTH shrinks to 26 px
+                  ◀/▶ arrows
+                  left zone:   align-self flex-start → strip stays at LEFT   ✓
+                  right zone:  align-self flex-end   → strip stays at RIGHT  ✓
+
+   The .ez zone divs are flex containers:
+     top/bottom (.ax-h): flex-direction row  — cross axis = vertical
+     left/right  (.ax-v): flex-direction col — cross axis = horizontal
+
+   flex-start/end on the cross axis moves the strip toward the correct wall.
+   The main-axis flex size (width for top/bottom, height for left/right) is
+   NOT changed — items keep their proportional share of the zone length.
+══════════════════════════════════════════════════════ */
+
+/* ── Collapse button (injected by CollapseManager.injectZoneCollapseBtn) ── */
+.ec-b-collapse {
+    font-size: 9px;
+    color: rgba(160,160,180,.55);
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+.ec-b-collapse:hover { color: #555; background: rgba(0,0,0,.07); }
+
+/* ─────────────────────────────────────────────────
+   §2a  ec-clps-v  — top / bottom zones
+        Items sit side-by-side (flex-row); collapse shrinks HEIGHT.
+        Default alignment → top (flex-start).
+        .ez.side-bottom overrides → bottom (flex-end).
+───────────────────────────────────────────────── */
+.ec-slot-collapsed.ec-clps-v {
+    align-self: flex-start !important; /* toward top zone wall — overridden for bottom */
+    height: 26px !important;
+    overflow: hidden;
+    min-height: 0 !important;
+}
+/* Bottom zone: strip stays at the bottom wall */
+.ez.side-bottom .ec-slot-collapsed.ec-clps-v {
+    align-self: flex-end !important;
+}
+
+/* Hide body content */
+.ec-slot-collapsed.ec-clps-v > .ec-body,
+.ec-slot-collapsed.ec-clps-v > .ec-tab-content,
+.ec-slot-collapsed.ec-clps-v > .ec-tab-bar,
+.ec-slot-collapsed.ec-clps-v > .ec-zc-body   { display: none !important; }
+
+/* Keep the header visible as the collapsed face (horizontal bar) */
+.ec-slot-collapsed.ec-clps-v.ec-embedded-dock  > .ec-hdr     { display: flex !important; }
+.ec-slot-collapsed.ec-clps-v.ec-tab-group      > .ec-grp-hdr { display: flex !important; }
+.ec-slot-collapsed.ec-clps-v.ec-zone-container > .ec-zc-hdr  { display: flex !important; }
+
+/* Clip long titles inside the 26 px bar */
+.ec-slot-collapsed.ec-clps-v .ec-title,
+.ec-slot-collapsed.ec-clps-v .ec-grp-label,
+.ec-slot-collapsed.ec-clps-v .ec-zc-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────────────
+   §2b  ec-clps-h  — left / right zones
+        Items stack vertically (flex-col); collapse shrinks WIDTH.
+        Default alignment → left (flex-start).
+        .ez.side-right overrides → right (flex-end).
+───────────────────────────────────────────────── */
+.ec-slot-collapsed.ec-clps-h {
+    align-self: flex-start !important; /* toward left zone wall — overridden for right */
+    width: 26px !important;
+    overflow: hidden;
+    min-width: 0 !important;
+}
+/* Right zone: strip stays at the right wall */
+.ez.side-right .ec-slot-collapsed.ec-clps-h {
+    align-self: flex-end !important;
+}
+
+/* Hide body content */
+.ec-slot-collapsed.ec-clps-h > .ec-body,
+.ec-slot-collapsed.ec-clps-h > .ec-tab-content,
+.ec-slot-collapsed.ec-clps-h > .ec-tab-bar,
+.ec-slot-collapsed.ec-clps-h > .ec-zc-body   { display: none !important; }
+
+/* Keep header visible; becomes a 26 px wide vertical strip */
+.ec-slot-collapsed.ec-clps-h.ec-embedded-dock  > .ec-hdr     { display: flex !important; }
+.ec-slot-collapsed.ec-clps-h.ec-tab-group      > .ec-grp-hdr { display: flex !important; }
+.ec-slot-collapsed.ec-clps-h.ec-zone-container > .ec-zc-hdr  { display: flex !important; }
+
+.ec-slot-collapsed.ec-clps-h.ec-embedded-dock  > .ec-hdr,
+.ec-slot-collapsed.ec-clps-h.ec-tab-group      > .ec-grp-hdr,
+.ec-slot-collapsed.ec-clps-h.ec-zone-container > .ec-zc-hdr {
+    flex-direction: column;
+    width: 26px;
+    height: 100%;
+    padding: 5px 2px;
+    overflow: hidden;
+    align-items: center;
+    gap: 2px;
+    border-bottom: none;
+    border-right: 1px solid rgba(0,0,0,.08);
+    box-sizing: border-box;
+}
+/* Right-zone strip: border on left side instead */
+.ez.side-right .ec-slot-collapsed.ec-clps-h.ec-embedded-dock  > .ec-hdr,
+.ez.side-right .ec-slot-collapsed.ec-clps-h.ec-tab-group      > .ec-grp-hdr,
+.ez.side-right .ec-slot-collapsed.ec-clps-h.ec-zone-container > .ec-zc-hdr {
+    border-right: none;
+    border-left: 1px solid rgba(0,0,0,.08);
+}
+
+/* Rotate text labels to fit the 26 px wide strip */
+.ec-slot-collapsed.ec-clps-h .ec-title,
+.ec-slot-collapsed.ec-clps-h .ec-grp-label,
+.ec-slot-collapsed.ec-clps-h .ec-zc-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-height: 90px;
+    padding: 3px 0;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   §3  FLOATING SLOT COLLAPSE  (independent H + V)
+   Rule: "header only visible" — body and tab-bar hidden.
+══════════════════════════════════════════════════════ */
+
+/* ── Float collapse buttons (injected by CollapseManager.injectFloatCollapseBtns) ── */
+.ec-b-clps-h,
+.ec-b-clps-v {
+    font-size: 9px;
+    color: rgba(160,160,180,.55);
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+.ec-b-clps-h:hover,
+.ec-b-clps-v:hover { color: #555; background: rgba(0,0,0,.07); }
+
+/* ─────────────────────────────────────────────────
+   §3a  VERTICAL float collapse  (height → 30 px)
+        Only the one-row control header stays visible.
+───────────────────────────────────────────────── */
+
+/* Card: hide body */
+.ec-float-clps-v.ec-embedded-dock > .ec-body           { display: none !important; }
+
+/* Tab group: hide tab-bar AND content — only ec-grp-hdr (always-visible for floats) stays */
+.ec-float-clps-v.ec-tab-group > .ec-tab-bar            { display: none !important; }
+.ec-float-clps-v.ec-tab-group > .ec-tab-content        { display: none !important; }
+
+/* Zone container: hide body — ec-zc-hdr (always-visible for floats) stays */
+.ec-float-clps-v.ec-zone-container > .ec-zc-body       { display: none !important; }
+
+/* Hide bottom-edge and SE-corner resize handles when V-collapsed */
+.ec-float-clps-v > .ec-float-rh[style*="ns-resize"],
+.ec-float-clps-v > .ec-float-rh[style*="nwse-resize"]  { display: none !important; }
+
+/* ─────────────────────────────────────────────────
+   §3b  HORIZONTAL float collapse  (width → 30 px)
+        Header row clips to the narrow strip.
+───────────────────────────────────────────────── */
+
+/* Card: clip header + hide body */
+.ec-float-clps-h.ec-embedded-dock > .ec-hdr            { overflow: hidden; }
+.ec-float-clps-h.ec-embedded-dock > .ec-body            { display: none !important; }
+
+/* Tab group: clip grpHdr + hide tab-bar + content */
+.ec-float-clps-h.ec-tab-group > .ec-grp-hdr            { overflow: hidden; }
+.ec-float-clps-h.ec-tab-group > .ec-tab-bar             { display: none !important; }
+.ec-float-clps-h.ec-tab-group > .ec-tab-content         { display: none !important; }
+
+/* Zone container: clip header + hide body */
+.ec-float-clps-h.ec-zone-container > .ec-zc-hdr        { overflow: hidden; }
+.ec-float-clps-h.ec-zone-container > .ec-zc-body        { display: none !important; }
+
+/* Hide right-edge and SE-corner resize handles when H-collapsed */
+.ec-float-clps-h > .ec-float-rh[style*="ew-resize"],
+.ec-float-clps-h > .ec-float-rh[style*="nwse-resize"]  { display: none !important; }
+
+/* ─────────────────────────────────────────────────
+   §3c  BOTH H + V collapsed  (tiny corner)
+───────────────────────────────────────────────── */
+.ec-float-clps-h.ec-float-clps-v { overflow: hidden; }
+
+/* All resize handles hidden */
+.ec-float-clps-h.ec-float-clps-v > .ec-float-rh        { display: none !important; }
+
+/* Headers clip to the MIN_FLOAT × MIN_FLOAT corner box */
+.ec-float-clps-h.ec-float-clps-v.ec-embedded-dock  > .ec-hdr,
+.ec-float-clps-h.ec-float-clps-v.ec-tab-group      > .ec-grp-hdr,
+.ec-float-clps-h.ec-float-clps-v.ec-zone-container > .ec-zc-hdr { overflow: hidden; }

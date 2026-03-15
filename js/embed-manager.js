@@ -17,6 +17,7 @@
      embed-drag-dock.js
      embed-drag-move.js
      embed-manager.js        ← this shim (last)
+     collapse-manager.js     ← after this shim
 ═══════════════════════════════════════════════════════ */
 
 const EmbedManager = {
@@ -94,6 +95,17 @@ const EmbedManager = {
   _startZCEmbedDrag: (...a) => EmbedDragMove._startZCEmbedDrag(...a),
   _ejectOneDock:     (...a) => EmbedDragMove._ejectOneDock(...a),
   _ejectZCChildren:  (...a) => EmbedDragMove._ejectZCChildren(...a),
+
+  /* ── Collapse (delegates to CollapseManager) ── */
+  refreshDockButton:        (...a) => CollapseManager.refreshDockButton(...a),
+  toggleDock:               (...a) => CollapseManager.toggleDock(...a),
+  injectZoneCollapseBtn:    (...a) => CollapseManager.injectZoneCollapseBtn(...a),
+  applyZoneCollapseState:   (...a) => CollapseManager.applyZoneCollapseState(...a),
+  toggleZoneSlot:           (...a) => CollapseManager.toggleZoneSlot(...a),
+  injectFloatCollapseBtns:  (...a) => CollapseManager.injectFloatCollapseBtns(...a),
+  applyFloatCollapseState:  (...a) => CollapseManager.applyFloatCollapseState(...a),
+  toggleFloatH:             (...a) => CollapseManager.toggleFloatH(...a),
+  toggleFloatV:             (...a) => CollapseManager.toggleFloatV(...a),
 };
 
 if (typeof module !== 'undefined' && module.exports) {

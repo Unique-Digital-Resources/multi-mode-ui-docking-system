@@ -71,8 +71,11 @@
         }
 
         hideDockHeaders(dock) {
-            dock.querySelector(':scope > .dock-header')?.classList.remove('visible');
-            dock.querySelector(':scope > .tabs-group-header')?.classList.remove('visible');
+            /* Don't hide headers that are pinned open by collapse */
+            const dh  = dock.querySelector(':scope > .dock-header');
+            const tgh = dock.querySelector(':scope > .tabs-group-header');
+            if (dh  && !dh.classList.contains('clps-pinned'))  dh.classList.remove('visible');
+            if (tgh && !tgh.classList.contains('clps-pinned')) tgh.classList.remove('visible');
             dock.querySelector(':scope > .dock-body > .dock-tabs-bar')?.classList.remove('ctrl-hidden');
         }
 
@@ -92,10 +95,20 @@
                 this.hideDockHeaders(dock);
             });
 
-            /* ── tabs-group-header Move button (only on tabbed docks) ──
-               Plain drag  = move whole group as-is
-               Ctrl+drag   = merge all panels as tabs into drop target
-               Shift+drag  = embed into another dock's zone              */
+            /* ── Collapse buttons ─────────────────────────────────────────
+               Both dh-collapse (dock-header) and tgh-collapse (tabs-group-header)
+               do the same thing: collapse / expand this dock.
+               CollapseManager.refreshDockButton sets the correct directional icon
+               based on the current parent orientation.                         */
+            CollapseManager.refreshDockButton(dock);
+            dock.querySelector('.dh-collapse')?.addEventListener('click', () => {
+                CollapseManager.toggleDock(this, dock);
+            });
+            dock.querySelector('.tgh-collapse')?.addEventListener('click', () => {
+                CollapseManager.toggleDock(this, dock);
+            });
+
+            /* ── tabs-group-header Move button ────────────────────────── */
             dock.querySelector('.tgh-move')?.addEventListener('mousedown', (e) => {
                 e.preventDefault();
                 if (e.shiftKey) {
@@ -108,13 +121,7 @@
                 DockManager.ungroupTabs(this, dock);
             });
 
-            /* ── dock-header Move button ──────────────────────────────────
-               Single-panel dock  : plain drag moves the whole dock, all modes.
-               Tabbed dock        : operates on the ACTIVE tab only.
-                 Plain drag  = detach active tab → place anywhere incl. back onto
-                               own tabbed dock (center=re-tab, directional=new sibling)
-                 Ctrl+drag   = move active tab into another dock as a new tab
-                 Shift+drag  = embed active panel's dock into a zone            */
+            /* ── dock-header Move button ──────────────────────────────── */
             dock.querySelector('.dh-move')?.addEventListener('mousedown', (e) => {
                 e.preventDefault();
                 const isTabbed = dock.panelData.length > 1;
@@ -141,10 +148,7 @@
                 }
             });
 
-            /* ── tab drag (only on tabbed docks) ──
-               Plain drag  = detach this tab into its own dock, place at drop zone
-               Ctrl+drag   = move this tab into the drop target as a new tab
-               Uses a 5 px threshold so a plain click still switches the tab.   */
+            /* ── tab drag ─────────────────────────────────────────────── */
             dock.querySelectorAll('.dock-tab').forEach(tab => {
                 tab.addEventListener('click', (e) => {
                     if (!e.target.classList.contains('tab-close')) {
@@ -169,7 +173,6 @@
                     const onMove = (mv) => {
                         if (Math.abs(mv.clientX - startX) < THRESH &&
                             Math.abs(mv.clientY - startY) < THRESH) return;
-                        /* Crossed threshold — commit to drag */
                         document.removeEventListener('mousemove', onMove);
                         document.removeEventListener('mouseup',   onUp);
                         mv.preventDefault();
@@ -197,7 +200,11 @@
             DragDrop.onMouseUp(this, e);
         }
 
-        updateResizeHandles()    { ResizeManager.updateResizeHandles(this); }
+        updateResizeHandles() {
+            ResizeManager.updateResizeHandles(this);
+            /* Refresh last-standing guard on all dock buttons after any layout change */
+            this.docks.forEach(d => CollapseManager.refreshDockButton(d));
+        }
         updateConnectionPoints() { ConnectionPoints.updateConnectionPoints(this); }
 
         addDock(panels, tabsPos) { return DockManager.createDock(this, this.container, panels, tabsPos); }

@@ -209,22 +209,29 @@ const EmbedBuilders = {
 
     wrap.append(grpHdr, tabBar, content);
 
-    /* ── Ctrl-hover: Ctrl press while inside → show group header + per-tab
-       controls; mouseleave → hide everything ── */
-    const _showHdr = () => {
+    /* Floating tab groups: group header is always visible (acts as drag handle
+       and houses the collapse buttons injected by CollapseManager).
+       Zone-embedded tab groups: revealed only on Ctrl press (Ctrl-hover pattern). */
+    if (floating) {
       grpHdr.classList.add('visible');
-      wrap.querySelectorAll('.ec-tab-ctrl').forEach(b => { b.style.display = ''; });
-    };
-    const _hideHdr = () => {
-      grpHdr.classList.remove('visible');
-      wrap.querySelectorAll('.ec-tab-ctrl').forEach(b => { b.style.display = 'none'; });
-    };
-    const _onKD = ev => { if (ev.key === 'Control' && !ev.repeat) _showHdr(); };
-    wrap.addEventListener('mouseenter', () => document.addEventListener('keydown', _onKD));
-    wrap.addEventListener('mouseleave', () => {
-      _hideHdr();
-      document.removeEventListener('keydown', _onKD);
-    });
+    } else {
+      const _showHdr = () => {
+        grpHdr.classList.add('visible');
+        wrap.querySelectorAll('.ec-tab-ctrl').forEach(b => { b.style.display = ''; });
+      };
+      const _hideHdr = () => {
+        /* Don't hide while the slot is collapsed — grpHdr is the only visible face */
+        if (wrap.classList.contains('ec-slot-collapsed')) return;
+        grpHdr.classList.remove('visible');
+        wrap.querySelectorAll('.ec-tab-ctrl').forEach(b => { b.style.display = 'none'; });
+      };
+      const _onKD = ev => { if (ev.key === 'Control' && !ev.repeat) _showHdr(); };
+      wrap.addEventListener('mouseenter', () => document.addEventListener('keydown', _onKD));
+      wrap.addEventListener('mouseleave', () => {
+        _hideHdr();
+        document.removeEventListener('keydown', _onKD);
+      });
+    }
 
     bFree.addEventListener('mousedown', e => {
       e.preventDefault(); e.stopPropagation();
@@ -337,7 +344,11 @@ const EmbedBuilders = {
     /* ── Ctrl-hover (zone-embedded only): show header on Ctrl press; hide on mouseleave ── */
     if (!floating) {
       const _showH = () => hdr.classList.add('visible');
-      const _hideH = () => hdr.classList.remove('visible');
+      const _hideH = () => {
+        /* Don't hide while collapsed — hdr is the only visible face */
+        if (wrap.classList.contains('ec-slot-collapsed')) return;
+        hdr.classList.remove('visible');
+      };
       const _kd = ev => { if (ev.key === 'Control' && !ev.repeat) _showH(); };
       wrap.addEventListener('mouseenter', () => document.addEventListener('keydown', _kd));
       wrap.addEventListener('mouseleave', () => { _hideH(); document.removeEventListener('keydown', _kd); });

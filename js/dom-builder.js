@@ -9,8 +9,9 @@ const DOMBuilder = {
         <div class="tabs-group-header">
             <span class="tgh-label">${panels.length} tabs</span>
             <div class="tgh-controls">
-                <button class="tgh-btn tgh-move" title="Drag=move · Ctrl+Drag=tab · Shift+Drag=embed into dock">☰ Move</button>
-                <button class="tgh-btn tgh-ungroup" title="Split all tabs into individual docks">⊟ Ungroup</button>
+                <button class="tgh-btn tgh-move"    title="Drag=move · Ctrl+Drag=tab · Shift+Drag=embed into dock">☰ Move</button>
+                <button class="tgh-btn tgh-collapse" title="Collapse">◀</button>
+                <button class="tgh-btn tgh-ungroup"  title="Split all tabs into individual docks">⊟ Ungroup</button>
             </div>
         </div>` : '';
 
@@ -33,8 +34,9 @@ const DOMBuilder = {
             <div class="dock-header">
                 <span class="dock-title">${esc(panels[ai].title)}</span>
                 <div class="dock-controls">
-                    <button class="dc-btn dh-move" title="${hasTabs ? 'Drag=detach active tab · Ctrl+Drag=move tab into dock · Shift+Drag=embed' : 'Drag=move · Ctrl+Drag=tab into dock · Shift+Drag=embed'}">☰</button>
-                    <button class="dc-btn dh-remove" title="Remove ${hasTabs ? 'this tab' : 'this dock'}">✕</button>
+                    <button class="dc-btn dh-move"     title="${hasTabs ? 'Drag=detach active tab · Ctrl+Drag=move tab into dock · Shift+Drag=embed' : 'Drag=move · Ctrl+Drag=tab into dock · Shift+Drag=embed'}">☰</button>
+                    <button class="dc-btn dh-collapse"  title="Collapse">◀</button>
+                    <button class="dc-btn dh-remove"    title="Remove ${hasTabs ? 'this tab' : 'this dock'}">✕</button>
                 </div>
             </div>
             <div class="dock-body">

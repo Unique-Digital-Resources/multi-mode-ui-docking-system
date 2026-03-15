@@ -1,6 +1,10 @@
 /* ═══════════════════════════════════════════════════════
    EmbedRender — zone and float rendering
    Converts embedState data into live DOM inside each dock panel.
+
+   Collapse injection:
+   • Zone slots  → CollapseManager.injectZoneCollapseBtn + applyZoneCollapseState
+   • Float items → CollapseManager.injectFloatCollapseBtns + applyFloatCollapseState
 ═══════════════════════════════════════════════════════ */
 
 const EmbedRender = {
@@ -37,6 +41,11 @@ const EmbedRender = {
     zone.slots.forEach(sw => {
       const el = EmbedBuilders._buildSlotEl(dock, sw.slot, side, false);
       el.style.flex = String(sw.flex);
+
+      /* ── Collapse button injection ── */
+      CollapseManager.injectZoneCollapseBtn(el, sw.slot, side);
+      CollapseManager.applyZoneCollapseState(el, sw.slot, side);
+
       el.addEventListener('mousedown', () => {
         EmbedCore.bringToTop(zEl);
       }, true);
@@ -66,11 +75,15 @@ const EmbedRender = {
       el.style.top      = fp.y + 'px';
       el.style.zIndex   = fp.z;
 
-      /* Default sizes for first-time floats; persisted across re-renders via fp.w/fp.h */
+      /* Default sizes for first-time floats; persisted via fp.w/fp.h */
       if (!fp.w) fp.w = fp.slot.type === 'zonecontainer' ? 240 : 200;
       if (!fp.h) fp.h = fp.slot.type === 'zonecontainer' ? 160 : 120;
       el.style.width  = fp.w + 'px';
       el.style.height = fp.h + 'px';
+
+      /* ── Float collapse buttons (H and V) ── */
+      CollapseManager.injectFloatCollapseBtns(fp, el);
+      CollapseManager.applyFloatCollapseState(fp, el);
 
       es.floatLayer.appendChild(el);
 
@@ -110,8 +123,7 @@ const EmbedRender = {
         el.appendChild(rh);
       });
 
-      /* Drag float by header — plain = free move; Shift mid-drag = dock-zone embed
-         Matches .ec-hdr (card), .ec-tab-bar (tabgroup), .ec-zc-hdr-drag (zonecontainer) */
+      /* ── Float header drag: plain = free move; Shift mid-drag = dock-zone embed ── */
       const hdTarget = el.querySelector('.ec-hdr, .ec-tab-bar, .ec-zc-hdr-drag');
       if (hdTarget) {
         hdTarget.addEventListener('mousedown', e => {

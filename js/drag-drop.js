@@ -97,13 +97,24 @@ const DragDrop = {
                     system.dropZone === 'center'
                         ? DockManager.swapDocks(system, dragged, system.dropTarget)
                         : DockManager.insertDock(system, dragged, system.dropTarget, system.dropZone);
-                    /* Re-setup events so hasTabs closure is fresh after the move,
-                       and ensure no stale ctrl-visible header state lingers.   */
+                    /* Rebuild HTML before re-wiring events so that any previously
+                       attached listeners (from the dock's original creation) are
+                       discarded. Without this, every drag adds a second set of
+                       listeners on the same elements — causing the collapse button
+                       to fire twice (collapse then immediately expand). */
                     system.hideDockHeaders(dragged);
+                    EmbedManager._saveEmbedLayers(dragged);
+                    dragged.innerHTML = DOMBuilder.buildDockHTML(dragged);
+                    EmbedManager._restoreEmbedLayers(dragged);
                     system.setupDockEvents(dragged);
+                    EmbedManager.renderBoard(dragged);
                     if (system.dropZone === 'center') {
                         system.hideDockHeaders(system.dropTarget);
+                        EmbedManager._saveEmbedLayers(system.dropTarget);
+                        system.dropTarget.innerHTML = DOMBuilder.buildDockHTML(system.dropTarget);
+                        EmbedManager._restoreEmbedLayers(system.dropTarget);
                         system.setupDockEvents(system.dropTarget);
+                        EmbedManager.renderBoard(system.dropTarget);
                     }
                 }
                 system.updateResizeHandles();

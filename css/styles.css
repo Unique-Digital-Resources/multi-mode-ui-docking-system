@@ -27,7 +27,9 @@
 @import "dock-header.css";
 @import "dock-body.css";
 
-/* 3. Interaction overlays + collapse */
+/* 3. Interaction overlays + collapse
+      collapse.css after drop-indicators (both use z-index context on .dock);
+      collapse.css before resize so resize handles (z:200) stay on top. */
 @import "drop-indicators.css";
 @import "collapse.css";
 @import "resize.css";
