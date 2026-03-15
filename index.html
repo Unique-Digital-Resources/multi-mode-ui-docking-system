@@ -5,36 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Docking System</title>
 
+<!-- ═══════════════════════════════════════════════════
+     OPTION A — single entry point (recommended for production / bundlers)
+════════════════════════════════════════════════════ -->
+<link rel="stylesheet" href="css/styles.css">
 
-<!-- 1. Foundation -->
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/hint.css">
+<!--
+     OPTION B — load each partial directly (useful during development
+     so browser DevTools maps errors to the exact partial file).
+     Comment out Option A and uncomment the block below.
 
-<!-- 2. Dock shell & chrome -->
-<link rel="stylesheet" href="css/dock-layout.css">
-<link rel="stylesheet" href="css/dock-header.css">
-<link rel="stylesheet" href="css/dock-tabs.css">
-
-<!-- 3. Interaction feedback -->
-<link rel="stylesheet" href="css/drop-indicators.css">
-<link rel="stylesheet" href="css/resize-handles.css">
-<link rel="stylesheet" href="css/connection-points.css">
-
-<!-- 4. Embed system layers -->
-<link rel="stylesheet" href="css/embed-layers.css">
-
-<!-- 5. Embedded slot types -->
-<link rel="stylesheet" href="css/embed-card.css">
-<link rel="stylesheet" href="css/embed-tabgroup.css">
-<link rel="stylesheet" href="css/embed-container.css">
-
-<!-- 6. Embed interaction -->
-<link rel="stylesheet" href="css/embed-buttons.css">
-<link rel="stylesheet" href="css/embed-floating.css">
-<link rel="stylesheet" href="css/embed-ghost.css">
-
-<!-- 7. Dev/debug -->
-<link rel="stylesheet" href="css/test-panel.css">
+<link rel="stylesheet" href="src/css/base.css">
+<link rel="stylesheet" href="src/css/layout.css">
+<link rel="stylesheet" href="src/css/dock-header.css">
+<link rel="stylesheet" href="src/css/dock-body.css">
+<link rel="stylesheet" href="src/css/drop-indicators.css">
+<link rel="stylesheet" href="src/css/resize.css">
+<link rel="stylesheet" href="src/css/embed-layers.css">
+<link rel="stylesheet" href="src/css/embed-overlay.css">
+<link rel="stylesheet" href="src/css/embed-card.css">
+<link rel="stylesheet" href="src/css/embed-tabgroup.css">
+<link rel="stylesheet" href="src/css/embed-zonecontainer.css">
+<link rel="stylesheet" href="src/css/embed-float.css">
+<link rel="stylesheet" href="src/css/embed-ghost.css">
+<link rel="stylesheet" href="src/css/ui.css">
+-->
 
 </head>
 <body>
@@ -146,8 +141,8 @@ window.dockingSystem = dockingSystem;
 
 /* ── Test panel drag ───────────────────── */
 (function() {
-  const panel = document.getElementById('test-panel');
-  const hdr   = document.getElementById('test-panel-hdr');
+  const panel  = document.getElementById('test-panel');
+  const hdr    = document.getElementById('test-panel-hdr');
   const toggle = document.getElementById('test-panel-toggle');
   let ox = 0, oy = 0;
 
@@ -193,7 +188,7 @@ function addDockWithTabs() {
   const n1 = ++panelSeq, n2 = ++panelSeq;
   const p1 = dockingSystem.mkPanel(`Tab ${n1}`, `<div class="dock-card">Tab ${n1}</div>`);
   const p2 = dockingSystem.mkPanel(`Tab ${n2}`, `<div class="dock-card">Tab ${n2}</div>`);
-  const dock = dockingSystem.addDock([p1, p2], 'top');
+  dockingSystem.addDock([p1, p2], 'top');
   dockingSystem.updateResizeHandles();
   dockingSystem.updateConnectionPoints();
 }
@@ -235,7 +230,6 @@ function addEmbedGroup(dockIdx) {
 }
 
 function resetLayout() {
-  // Destroy and re-create
   dockingSystem.destroy();
   const c = document.getElementById('docking-container');
   c.innerHTML = '';

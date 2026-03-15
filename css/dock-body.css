@@ -1,0 +1,158 @@
+/* ════════════════════════════════════════════════════════
+   dock-body.css — Dock body, tabs bar, panels, content card
+════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════
+   DOCK BODY  (wraps tabs-bar + main area)
+══════════════════════════════════════ */
+.dock-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+    min-width: 0;
+}
+.dock[data-tabs-pos="top"]    > .dock-body { flex-direction: column; }
+.dock[data-tabs-pos="bottom"] > .dock-body { flex-direction: column-reverse; }
+.dock[data-tabs-pos="left"]   > .dock-body { flex-direction: row; }
+.dock[data-tabs-pos="right"]  > .dock-body { flex-direction: row-reverse; }
+
+/* ══════════════════════════════════════
+   TABS BAR
+══════════════════════════════════════ */
+.dock-tabs-bar {
+    display: flex;
+    flex-shrink: 0;
+    background: #f2f2f2;
+    scrollbar-width: none;
+}
+.dock-tabs-bar::-webkit-scrollbar { display: none; }
+.dock-tabs-bar.ctrl-hidden        { display: none !important; }
+
+/* Horizontal tabs (top / bottom) */
+.dock[data-tabs-pos="top"]    > .dock-body > .dock-tabs-bar,
+.dock[data-tabs-pos="bottom"] > .dock-body > .dock-tabs-bar {
+    flex-direction: row;
+    overflow-x: auto;
+    border-bottom: 1px solid #d8d8d8;
+}
+.dock[data-tabs-pos="bottom"] > .dock-body > .dock-tabs-bar {
+    border-bottom: none;
+    border-top: 1px solid #d8d8d8;
+}
+
+/* Vertical tabs (left / right) */
+.dock[data-tabs-pos="left"]  > .dock-body > .dock-tabs-bar,
+.dock[data-tabs-pos="right"] > .dock-body > .dock-tabs-bar {
+    flex-direction: column;
+    width: 90px;
+    overflow-y: auto;
+    border-right: 1px solid #d8d8d8;
+}
+.dock[data-tabs-pos="right"] > .dock-body > .dock-tabs-bar {
+    border-right: none;
+    border-left: 1px solid #d8d8d8;
+}
+
+/* ── Tab items ── */
+.dock-tab {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 9px;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    color: #777;
+    flex-shrink: 0;
+    user-select: none;
+    border-bottom: 2px solid transparent;
+    transition: background .1s;
+}
+.dock-tab:hover  { background: #e6e6e6; }
+.dock-tab.active { background: white; color: #111; border-bottom-color: #444; }
+
+/* Vertical tab overrides */
+.dock[data-tabs-pos="left"]  > .dock-body > .dock-tabs-bar > .dock-tab,
+.dock[data-tabs-pos="right"] > .dock-body > .dock-tabs-bar > .dock-tab {
+    border-bottom: none;
+    border-right: 2px solid transparent;
+    white-space: normal;
+    word-break: break-word;
+    width: 100%;
+    padding: 7px 8px;
+    font-size: 10px;
+}
+.dock[data-tabs-pos="left"]  > .dock-body > .dock-tabs-bar > .dock-tab.active { border-right-color: #444; }
+.dock[data-tabs-pos="right"] > .dock-body > .dock-tabs-bar > .dock-tab        { border-right: none; border-left: 2px solid transparent; }
+.dock[data-tabs-pos="right"] > .dock-body > .dock-tabs-bar > .dock-tab.active { border-left-color: #444; }
+
+.tab-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+
+.tab-close {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #bbb;
+    font-size: 10px;
+    line-height: 1;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+}
+.tab-close:hover { background: #fcc; color: #c00; }
+
+/* ══════════════════════════════════════
+   DOCK MAIN / CONTENT / PANEL / CARD
+   position:relative on dock-panel so embed layers
+   are absolute inside it.
+══════════════════════════════════════ */
+.dock-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
+    position: relative;
+}
+
+.dock-content {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.dock-panel {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    padding: 15px;
+    min-height: 0;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+.dock-panel.active { display: flex; }
+
+.dock-card {
+    background: #fafafa;
+    border: 1px solid #e4e4e4;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #bbb;
+    min-height: 80px;
+}

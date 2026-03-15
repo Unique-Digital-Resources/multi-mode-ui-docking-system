@@ -1,0 +1,53 @@
+/* ════════════════════════════════════════════════════════
+   styles.css — Master entry point
+   Imports all partials in dependency order.
+
+   Use this single file in index.html instead of 14 <link>
+   tags if you prefer one HTTP request (or are using a bundler
+   that respects @import order).
+
+   Load order rationale
+   ────────────────────
+   1. base / layout   — reset + flex scaffolding; everything else depends on these.
+   2. dock chrome     — dock-header defines @keyframes hdrIn used by embed headers.
+   3. Interaction     — drop-indicators and resize handles sit above embed layers (z:900 / z:200).
+   4. Embed layers    — DOM scaffolding (.ez, .ez-rh, .ez-float-layer, .ez-drop-overlay).
+   5. Embed overlay   — orange drop-zone UI drawn inside .ez-drop-overlay.
+   6. Embed slot types — card → tabgroup → zonecontainer (tabgroup references hdrIn from #2).
+   7. Float behaviour — builds on slot types; overrides size/position for .ec-floating.
+   8. Drag ghost      — #embed-ghost is fixed-position, independent of all other layers.
+   9. UI chrome       — #ctrl-hint and test panel; highest z-index (9999/10000).
+════════════════════════════════════════════════════════ */
+
+/* 1. Foundation */
+@import "base.css";
+@import "layout.css";
+
+/* 2. Dock chrome */
+@import "dock-header.css";
+@import "dock-body.css";
+
+/* 3. Interaction overlays + collapse */
+@import "drop-indicators.css";
+@import "collapse.css";
+@import "resize.css";
+
+/* 4. Embed system layers (DOM scaffolding) */
+@import "embed-layers.css";
+
+/* 5. Embed drop-zone overlay UI */
+@import "embed-overlay.css";
+
+/* 6. Embed slot types */
+@import "embed-card.css";
+@import "embed-tabgroup.css";
+@import "embed-zonecontainer.css";
+
+/* 7. Float behaviour (extends slot types) */
+@import "embed-float.css";
+
+/* 8. Drag ghost */
+@import "embed-ghost.css";
+
+/* 9. UI chrome */
+@import "ui.css";

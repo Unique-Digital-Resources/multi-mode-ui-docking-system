@@ -1,75 +1,29 @@
-/* ══════════════════════════════════════
-   EMBEDDED TAB GROUP
-   Tab group shell, tab bar (horizontal
-   and vertical), tab items, group header
-   (Ctrl-hover revealed), content area.
-══════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   embed-tabgroup.css — Embedded tab group slot
+════════════════════════════════════════════════════════ */
 
-/* ── Shell ── */
+/* ── Tab group shell ── */
 .ec-tab-group {
-    display: flex; flex-direction: column;
-    border: 1px solid rgba(0,0,0,.10); border-radius: 5px;
-    background: #f5f5f8; overflow: hidden;
-    min-width: 55px; min-height: 34px; flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(0,0,0,.10);
+    border-radius: 5px;
+    background: #f5f5f8;
+    overflow: hidden;
+    min-width: 55px;
+    min-height: 34px;
+    flex: 1;
     box-shadow: 0 1px 4px rgba(0,0,0,.08);
 }
+
+/* Orientation variants */
 .ec-tab-group.tbl-left  { flex-direction: row; }
 .ec-tab-group.tbl-right { flex-direction: row-reverse; }
 .ec-tab-group.tbl-bot   { flex-direction: column-reverse; }
 
-/* ── Tab bar ── */
-.ec-tab-bar {
-    display: flex; flex-direction: row;
-    background: #e4e5ec; border-bottom: 1px solid rgba(0,0,0,.08);
-    flex-shrink: 0; overflow: hidden;
-}
-.ec-tab-group.tbl-left .ec-tab-bar,
-.ec-tab-group.tbl-right .ec-tab-bar {
-    flex-direction: column; border-bottom: none;
-    border-right: 1px solid rgba(0,0,0,.08);
-    width: 90px; overflow-x: hidden; overflow-y: auto; scrollbar-width: none;
-}
-.ec-tab-group.tbl-left  .ec-tab-bar::-webkit-scrollbar,
-.ec-tab-group.tbl-right .ec-tab-bar::-webkit-scrollbar { display: none; }
-.ec-tab-group.tbl-right .ec-tab-bar { border-right: none; border-left: 1px solid rgba(0,0,0,.08); }
-.ec-tab-group.tbl-bot   .ec-tab-bar { border-bottom: none; border-top: 1px solid rgba(0,0,0,.08); }
-
-/* ── Tab controls row ── */
-.ec-tb-ctrl {
-    display: flex; flex-direction: row; align-items: center;
-    gap: 1px; padding: 2px 3px; border-bottom: 1px solid rgba(0,0,0,.08); flex-shrink: 0;
-}
-.ec-tab-group.tbl-left  .ec-tb-ctrl,
-.ec-tab-group.tbl-right .ec-tb-ctrl { flex-direction: column; }
-
-/* ── Tab items ── */
-.ec-tab-item {
-    display: flex; align-items: center; gap: 4px;
-    padding: 0 7px; height: 24px; font-size: 10px;
-    color: #888; cursor: pointer; white-space: nowrap; flex-shrink: 0;
-    border-bottom: 2px solid transparent;
-    transition: color .1s, background .1s, border-color .1s;
-}
-.ec-tab-item:hover  { background: rgba(0,0,0,.04); color: #444; }
-.ec-tab-item.active { color: #222; border-bottom-color: #4a90d9; background: #f5f5f8; }
-
-.ec-tab-group.tbl-left .ec-tab-item,
-.ec-tab-group.tbl-right .ec-tab-item {
-    height: auto; padding: 5px 8px;
-    border-bottom: none; border-right: 2px solid transparent;
-}
-.ec-tab-group.tbl-left  .ec-tab-item.active { border-right-color: #4a90d9; background: rgba(74,144,217,.06); }
-.ec-tab-group.tbl-right .ec-tab-item        { border-right: none; border-left: 2px solid transparent; }
-.ec-tab-group.tbl-right .ec-tab-item.active { border-left-color: #4a90d9; background: rgba(74,144,217,.06); }
-.ec-tab-group.tbl-bot   .ec-tab-item        { border-bottom: none; border-top: 2px solid transparent; }
-.ec-tab-group.tbl-bot   .ec-tab-item.active { border-top-color: #4a90d9; background: #f5f5f8; }
-
-.ec-tab-lbl     { flex: 1; overflow: hidden; text-overflow: ellipsis; }
-.ec-tab-content { flex: 1; overflow: hidden; min-height: 0; min-width: 0; background: #fafafa; }
-
-/* ── Group header (Ctrl-hover revealed) ── */
+/* ── Group header (Ctrl-hover reveals) ── */
 .ec-grp-hdr {
-    display: none;  /* shown via .visible toggled by JS */
+    display: none;
     align-items: center;
     gap: 2px;
     height: 22px;
@@ -95,11 +49,12 @@
     pointer-events: none;
 }
 
-/* Vertical orientation (left/right zone groups) */
+/* Vertical orientation for left/right zone groups */
 .ec-tab-group.tbl-left  > .ec-grp-hdr,
 .ec-tab-group.tbl-right > .ec-grp-hdr {
     flex-direction: column;
-    height: auto; width: 22px;
+    height: auto;
+    width: 22px;
     border-bottom: none;
     border-right: 1px solid rgba(255,255,255,.08);
     padding: 3px 0;
@@ -108,5 +63,85 @@
     border-right: none;
     border-left: 1px solid rgba(255,255,255,.08);
 }
+/* No room for label text in vertical orientation */
 .ec-tab-group.tbl-left  > .ec-grp-hdr > .ec-grp-label,
 .ec-tab-group.tbl-right > .ec-grp-hdr > .ec-grp-label { display: none; }
+
+/* ── Tab bar ── */
+.ec-tab-bar {
+    display: flex;
+    flex-direction: row;
+    background: #e4e5ec;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+.ec-tab-group.tbl-left .ec-tab-bar,
+.ec-tab-group.tbl-right .ec-tab-bar {
+    flex-direction: column;
+    border-bottom: none;
+    border-right: 1px solid rgba(0,0,0,.08);
+    width: 90px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+.ec-tab-group.tbl-left  .ec-tab-bar::-webkit-scrollbar,
+.ec-tab-group.tbl-right .ec-tab-bar::-webkit-scrollbar { display: none; }
+.ec-tab-group.tbl-right .ec-tab-bar { border-right: none; border-left: 1px solid rgba(0,0,0,.08); }
+.ec-tab-group.tbl-bot   .ec-tab-bar { border-bottom: none; border-top: 1px solid rgba(0,0,0,.08); }
+
+/* Tab bar control row (houses move/ungroup buttons) */
+.ec-tb-ctrl {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1px;
+    padding: 2px 3px;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+    flex-shrink: 0;
+}
+.ec-tab-group.tbl-left  .ec-tb-ctrl,
+.ec-tab-group.tbl-right .ec-tb-ctrl { flex-direction: column; }
+
+/* ── Tab items ── */
+.ec-tab-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 7px;
+    height: 24px;
+    font-size: 10px;
+    color: #888;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    border-bottom: 2px solid transparent;
+    transition: color .1s, background .1s, border-color .1s;
+}
+.ec-tab-item:hover  { background: rgba(0,0,0,.04); color: #444; }
+.ec-tab-item.active { color: #222; border-bottom-color: #4a90d9; background: #f5f5f8; }
+
+/* Vertical tab items */
+.ec-tab-group.tbl-left  .ec-tab-item,
+.ec-tab-group.tbl-right .ec-tab-item {
+    height: auto;
+    padding: 5px 8px;
+    border-bottom: none;
+    border-right: 2px solid transparent;
+}
+.ec-tab-group.tbl-left  .ec-tab-item.active { border-right-color: #4a90d9; background: rgba(74,144,217,.06); }
+.ec-tab-group.tbl-right .ec-tab-item        { border-right: none; border-left: 2px solid transparent; }
+.ec-tab-group.tbl-right .ec-tab-item.active { border-left-color: #4a90d9; background: rgba(74,144,217,.06); }
+.ec-tab-group.tbl-bot   .ec-tab-item        { border-bottom: none; border-top: 2px solid transparent; }
+.ec-tab-group.tbl-bot   .ec-tab-item.active { border-top-color: #4a90d9; background: #f5f5f8; }
+
+.ec-tab-lbl     { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.ec-tab-content { flex: 1; overflow: hidden; min-height: 0; min-width: 0; background: #fafafa; }
+
+/* ── Per-tab drag controls (⠿ and ☰) ───────────────────────
+   Hidden by default; JS sets display:'' on Ctrl press and
+   display:none on mouseleave via the _showHdr/_hideHdr helpers.
+─────────────────────────────────────────────────────────────── */
+/* Inline so they take up no space when hidden without collapsing the tab row */
+.ec-tab-ctrl { display: none; }

@@ -1,0 +1,27 @@
+/* ════════════════════════════════════════════════════════
+   layout.css — Flex layout wrappers and dock shell
+════════════════════════════════════════════════════════ */
+
+/* ── Layout wrappers ── */
+.dock-row    { display: flex; flex: 1; position: relative; }
+.dock-column { display: flex; flex-direction: column; flex: 1; position: relative; }
+
+/* ── Dock shell ──────────────────────────────────────
+   Must be position:relative + overflow:hidden so child
+   absolute embed layers are clipped to the dock bounds.
+─────────────────────────────────────────────────────── */
+.dock {
+    background: white;
+    border: 1px solid #ccc;
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    min-height: 150px;
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+/* Drag ghost state */
+.dock.dragging { opacity: .35; pointer-events: none; }

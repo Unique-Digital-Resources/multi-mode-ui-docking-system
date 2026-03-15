@@ -1,0 +1,83 @@
+/* ════════════════════════════════════════════════════════
+   embed-zonecontainer.css — Zone container slot
+   Groups multiple embedded slots inside one zone strip.
+   Header is hidden by default; JS adds .visible on Ctrl press.
+════════════════════════════════════════════════════════ */
+
+/* ── Container shell ── */
+.ec-zone-container {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 4px;
+    background: rgba(255,255,255,.02);
+    min-width: 0;
+    min-height: 0;
+}
+
+/* ── Container header (Ctrl-hover reveals) ── */
+.ec-zc-hdr {
+    display: none;
+    align-items: center;
+    gap: 2px;
+    height: 22px;
+    background: #181c2e;
+    border-bottom: 1px solid rgba(255,255,255,.10);
+    padding: 0 3px;
+    flex-shrink: 0;
+    animation: hdrIn .12s ease;
+}
+.ec-zc-hdr.visible { display: flex; }
+
+.ec-zc-label {
+    flex: 1;
+    font-size: 9px;
+    color: rgba(200,200,220,.45);
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    font-weight: 600;
+    padding: 0 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+
+/* ── Container body ──────────────────────────────────
+   .ec-zc-row → top/bottom zones: children side-by-side
+   .ec-zc-col → left/right zones:  children stacked
+─────────────────────────────────────────────────────── */
+.ec-zc-body {
+    display: flex;
+    flex: 1;
+    gap: 2px;
+    padding: 2px;
+    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
+}
+.ec-zc-row { flex-direction: row; }
+.ec-zc-col { flex-direction: column; }
+
+/* Children fill their share */
+.ec-zc-body > .ec-embedded-dock,
+.ec-zc-body > .ec-tab-group,
+.ec-zc-body > .ec-zone-container {
+    min-width: 0;
+    min-height: 0;
+}
+
+/* ── ⊞ ZC embed button ── */
+.ec-b-zc-embed        { cursor: grab; color: rgba(80,200,140,.45); }
+.ec-b-zc-embed:hover  { background: rgba(80,200,140,.12); color: #44bb88; }
+.ec-b-zc-embed:active { cursor: grabbing; color: #22994d; }
+
+/* ── Floating ZC header — always visible, acts as drag handle ──
+   JS adds .ec-zc-hdr-drag on floating zone containers so the header
+   is always shown (the .visible class is pre-applied in JS too).
+   No extra style needed here; the sentinel class is for JS querySelector.
+─────────────────────────────────────────────────────────────────── */
+
+/* ── ZC drop indicator (pointer-events off during drag) ── */
+.ec-zc-drop-ind { pointer-events: none; transition: opacity .1s; }

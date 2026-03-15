@@ -1,0 +1,45 @@
+/* ════════════════════════════════════════════════════════
+   embed-float.css — Floating slot elements and resize handles
+
+   All three slot types (card, tabgroup, zonecontainer) share
+   the same absolute positioning setup when floating.
+════════════════════════════════════════════════════════ */
+
+/* ── Shared floating layout for all slot types ── */
+.ec-embedded-dock.ec-floating,
+.ec-tab-group.ec-floating,
+.ec-zone-container.ec-floating {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+    min-width: 80px;
+    min-height: 80px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.10);
+    z-index: 1;
+}
+
+/* Default sizes for card and tabgroup floats (width/height set by JS from fp.w/fp.h) */
+.ec-embedded-dock.ec-floating { width: 200px; height: 140px; }
+.ec-tab-group.ec-floating     { width: 220px; height: 160px; }
+
+/* Zone container float — body fills space below always-visible header */
+.ec-zone-container.ec-floating             { width: 240px; min-height: 100px; }
+.ec-zone-container.ec-floating > .ec-zc-body { flex: 1; min-height: 0; }
+
+/* Children inside a floating ZC fill their share */
+.ec-zone-container.ec-floating .ec-embedded-dock,
+.ec-zone-container.ec-floating .ec-tab-group {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+/* ── Float resize handles (right / bottom / SE corner) ── */
+.ec-float-rh {
+    position: absolute;
+    z-index: 2;
+    background: transparent;
+}
+.ec-float-rh:hover { background: rgba(74,144,217,.25); }

@@ -1,28 +1,96 @@
-/* ══════════════════════════════════════
-   EMBEDDED CARD
-   Single embedded dock slot: shell,
-   header bar, title, and body area.
-══════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   embed-card.css — Embedded card slot + shared embed buttons
+════════════════════════════════════════════════════════ */
 
+/* ── Embedded card slot ── */
 .ec-embedded-dock {
-    display: flex; flex-direction: column;
-    border: 1px solid rgba(0,0,0,.10); border-radius: 5px;
-    background: #f5f5f8; overflow: hidden;
-    min-width: 55px; min-height: 34px; flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(0,0,0,.10);
+    border-radius: 5px;
+    background: #f5f5f8;
+    overflow: hidden;
+    min-width: 55px;
+    min-height: 34px;
+    flex: 1;
     box-shadow: 0 1px 4px rgba(0,0,0,.08);
 }
 
 /* Card header */
 .ec-hdr {
-    display: flex; align-items: center; height: 25px;
-    background: #e8e9ef; border-bottom: 1px solid rgba(0,0,0,.08);
-    padding: 0 3px; gap: 1px; flex-shrink: 0;
-}
-.ec-title {
-    flex: 1; font-size: 10px; color: #666;
-    text-transform: uppercase; letter-spacing: .8px; font-weight: 600;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 4px;
+    display: flex;
+    align-items: center;
+    height: 25px;
+    background: #e8e9ef;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+    padding: 0 3px;
+    gap: 1px;
+    flex-shrink: 0;
 }
 
-/* Card body */
-.ec-body { flex: 1; min-height: 0; overflow: hidden; background: #fafafa; }
+.ec-title {
+    flex: 1;
+    font-size: 10px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 4px;
+}
+
+.ec-body {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    background: #fafafa;
+}
+
+/* ── Shared embed action buttons ── */
+.ec-btn {
+    border: none;
+    background: transparent;
+    color: #bbb;
+    border-radius: 3px;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: background .1s, color .1s;
+    font-family: monospace;
+    font-weight: 700;
+    padding: 0;
+    width: 22px;
+    height: 22px;
+}
+.ec-btn:hover  { background: rgba(0,0,0,.07); color: #444; }
+.ec-btn:active { color: #4a90d9; }
+
+.ec-b-small    { width: 18px; height: 18px; font-size: 11px; }
+
+/* ⊞ Dock-to-zone button */
+.ec-b-dock       { color: rgba(74,144,217,.4); }
+.ec-b-dock:hover { background: rgba(74,144,217,.08); color: #4a90d9; }
+
+/* ↗ Untab button */
+.ec-b-untab       { font-size: 10px; color: #ccc; cursor: pointer; }
+.ec-b-untab:hover { background: rgba(74,144,217,.10); color: #4a90d9; }
+
+/* ⠿ Free-float drag button */
+.ec-b-free        { cursor: grab; color: rgba(160,160,180,.50); }
+.ec-b-free:hover  { background: rgba(120,120,160,.10); color: #888; }
+.ec-b-free:active { cursor: grabbing; color: #555; }
+
+/* ☰ Move button */
+.ec-b-move        { cursor: grab; color: rgba(100,160,220,.45); }
+.ec-b-move:hover  { background: rgba(74,144,217,.12); color: #4a90d9; }
+.ec-b-move:active { cursor: grabbing; color: #2266bb; }
+
+/* ⊟ Ungroup button */
+.ec-b-ungroup       { color: rgba(240,192,96,.5); font-size: 12px; cursor: pointer; }
+.ec-b-ungroup:hover { background: rgba(240,192,96,.15); color: #c8920a; }

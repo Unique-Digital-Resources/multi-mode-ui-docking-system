@@ -100,6 +100,19 @@ const EmbedBuilders = {
       tabEl.className = 'ec-tab-item' + (tab.id === tg.activeId ? ' active' : '');
       tabEl.dataset.tabId = tab.id;
 
+      /* ── Per-tab ⠿ and ☰ buttons — hidden until Ctrl ── */
+      const bTabFree = document.createElement('button');
+      bTabFree.className = 'ec-btn ec-b-small ec-b-free ec-tab-ctrl';
+      bTabFree.title = 'Drag = free float this tab  |  Shift+Drag = dock to zone';
+      bTabFree.textContent = '⠿';
+      bTabFree.style.display = 'none';
+
+      const bTabMove = document.createElement('button');
+      bTabMove.className = 'ec-btn ec-b-small ec-b-move ec-tab-ctrl';
+      bTabMove.title = 'Drag = move this tab  |  Ctrl+Drag = tab into existing slot';
+      bTabMove.textContent = '☰';
+      bTabMove.style.display = 'none';
+
       const lbl = document.createElement('span');
       lbl.className = 'ec-tab-lbl'; lbl.textContent = tab.title;
 
@@ -110,14 +123,85 @@ const EmbedBuilders = {
         EmbedSlots._doUntab(dock, tg, tab.id);
       });
 
-      tabEl.append(lbl, untab);
-      tabEl.addEventListener('click', () => {
+      tabEl.append(bTabFree, bTabMove, lbl, untab);
+      tabEl.addEventListener('click', e => {
+        /* Ignore clicks that land on one of our control buttons */
+        if (e.target.classList.contains('ec-tab-ctrl') || e.target.classList.contains('ec-b-untab')) return;
         tg.activeId = tab.id;
         const s = EmbedSlots._findZone(dock, tg.id);
-        if (s) EmbedRender.renderZone(dock, s);
-        else   EmbedRender.renderFloats(dock);
+        if (s && s !== '_float_') EmbedRender.renderZone(dock, s);
+        else                      EmbedRender.renderFloats(dock);
       });
       tabBar.appendChild(tabEl);
+
+      /* ─────────────────────────────────────────────────────────────────
+         Per-tab drag helper.
+
+         Strategy:
+           1. Capture which zone owns this tabgroup BEFORE modifying tg.
+           2. Splice the tab out of tg.tabs.
+           3. If tg is now empty → remove it entirely via _removeSlot.
+              If tg has exactly 1 tab left → replace it with a card in the
+              zone/floats data so re-render produces a clean single card.
+           4. Re-render the source zone/floats.
+           5. Stage the new cardSlot as a float entry so the existing drag
+              functions (_startFreeDrag / _startMoveDrag) can find and
+              remove it via _removeSlot, then begin their drag loop.
+      ───────────────────────────────────────────────────────────────── */
+      const _extractAndDrag = (e, dragMode) => {
+        /* Step 1 — snapshot zone ownership before we mutate tg */
+        const zoneSide = EmbedSlots._findZone(dock, tg.id);
+
+        /* Step 2 — remove this tab from the group */
+        const ti = tg.tabs.findIndex(t => t.id === tab.id);
+        if (ti < 0) return;
+        const removedTab = tg.tabs.splice(ti, 1)[0];
+        if (tg.activeId === tab.id) tg.activeId = tg.tabs[0]?.id || null;
+
+        /* Step 3 — reconcile the tabgroup */
+        if (tg.tabs.length === 0) {
+          /* Group is now empty — remove it from wherever it lives */
+          EmbedSlots._removeSlot(dock, tg.id);
+        } else if (tg.tabs.length === 1) {
+          /* Collapse solo-tab group → plain card (mirrors _doUntab behaviour) */
+          const soloCard = { id: EmbedCore.uid(), type: 'card', title: tg.tabs[0].title };
+          EmbedBuilders._replaceSlotInState(dock, tg.id, soloCard, zoneSide);
+        }
+        /* 2+ tabs remaining → tg is still valid; re-render will update the bar */
+
+        /* Step 4 — re-render source */
+        if (zoneSide && zoneSide !== '_float_') {
+          EmbedRender.renderZone(dock, zoneSide);
+          EmbedResize._updateCorners(dock);
+        } else {
+          EmbedRender.renderFloats(dock);
+        }
+
+        /* Step 5 — stage the extracted card as a float so the drag
+           functions can locate it via _removeSlot and start dragging */
+        const cardSlot = { id: EmbedCore.uid(), type: 'card', title: removedTab.title };
+        const ap = EmbedCore._activePanel(dock);
+        if (ap?.embedState) {
+          ap.embedState.floats.push({ slot: cardSlot, x: 0, y: 0, z: ++EmbedCore._topZ });
+        }
+
+        if (dragMode === 'free') {
+          if (e.shiftKey) EmbedDragDock._startDockDrag(dock, cardSlot, e);
+          else            EmbedDragFree._startFreeDrag(dock, cardSlot, e);
+        } else {
+          EmbedDragMove._startMoveDrag(dock._embedSystem, dock, cardSlot, e, e.ctrlKey || e.metaKey);
+        }
+      };
+
+      bTabFree.addEventListener('mousedown', e => {
+        e.preventDefault(); e.stopPropagation();
+        _extractAndDrag(e, 'free');
+      });
+
+      bTabMove.addEventListener('mousedown', e => {
+        e.preventDefault(); e.stopPropagation();
+        _extractAndDrag(e, 'move');
+      });
     });
 
     const content = document.createElement('div');
@@ -125,9 +209,16 @@ const EmbedBuilders = {
 
     wrap.append(grpHdr, tabBar, content);
 
-    /* ── Ctrl-hover: press Ctrl once while inside → show header; mouseleave → hide ── */
-    const _showHdr = () => grpHdr.classList.add('visible');
-    const _hideHdr = () => grpHdr.classList.remove('visible');
+    /* ── Ctrl-hover: Ctrl press while inside → show group header + per-tab
+       controls; mouseleave → hide everything ── */
+    const _showHdr = () => {
+      grpHdr.classList.add('visible');
+      wrap.querySelectorAll('.ec-tab-ctrl').forEach(b => { b.style.display = ''; });
+    };
+    const _hideHdr = () => {
+      grpHdr.classList.remove('visible');
+      wrap.querySelectorAll('.ec-tab-ctrl').forEach(b => { b.style.display = 'none'; });
+    };
     const _onKD = ev => { if (ev.key === 'Control' && !ev.repeat) _showHdr(); };
     wrap.addEventListener('mouseenter', () => document.addEventListener('keydown', _onKD));
     wrap.addEventListener('mouseleave', () => {
@@ -152,6 +243,34 @@ const EmbedBuilders = {
     });
 
     return wrap;
+  },
+
+  /* ── Internal helper: replace a slot in the data model by id ────────
+     Used when collapsing a 1-tab tabgroup into a plain card without
+     going through a full _removeSlot + re-insert cycle.
+  ── */
+  _replaceSlotInState(dock, oldId, newSlot, zoneSide) {
+    for (const panel of dock.panelData) {
+      const es = panel.embedState;
+      if (!es) continue;
+
+      if (zoneSide === '_float_') {
+        const fi = es.floats.findIndex(fp => fp.slot.id === oldId);
+        if (fi !== -1) { es.floats[fi].slot = newSlot; return; }
+      } else if (zoneSide) {
+        const zone = es.zones[zoneSide];
+        if (!zone) continue;
+        /* Direct slot in zone */
+        const si = zone.slots.findIndex(sw => sw.slot.id === oldId);
+        if (si !== -1) { zone.slots[si].slot = newSlot; return; }
+        /* One level nested inside a zonecontainer */
+        for (const sw of zone.slots) {
+          if (sw.slot.type !== 'zonecontainer') continue;
+          const ci = sw.slot.slots.findIndex(csw => csw.slot.id === oldId);
+          if (ci !== -1) { sw.slot.slots[ci].slot = newSlot; return; }
+        }
+      }
+    }
   },
 
   /* ── ZONE CONTAINER ───────────────────────────────────────────────── */

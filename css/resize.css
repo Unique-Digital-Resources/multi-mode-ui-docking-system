@@ -1,0 +1,31 @@
+/* ════════════════════════════════════════════════════════
+   resize.css — Layout resize handles and connection points
+
+   z:200 — must sit ABOVE all embed layers (10/11/50/800)
+   so dock layout splitters are always grabbable.
+════════════════════════════════════════════════════════ */
+
+/* ── Dock layout resize handles ── */
+.resize-handle {
+    position: absolute;
+    background: transparent;
+    z-index: 200;
+}
+.resize-handle:hover,
+.resize-handle.resizing { background: #b0b0b0; }
+
+.resize-handle.vertical   { width: 4px; height: 100%; right: -2px; top: 0; cursor: ew-resize; }
+.resize-handle.horizontal { height: 4px; width: 100%; bottom: -2px; left: 0; cursor: ns-resize; }
+
+/* ── Connection points (intersection of resize handles) ── */
+.connection-point {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background: #999;
+    border: 2px solid white;
+    border-radius: 50%;
+    z-index: 200;
+    pointer-events: all;
+    box-shadow: 0 0 0 1px #bbb;
+}

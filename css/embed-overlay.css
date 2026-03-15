@@ -1,0 +1,76 @@
+/* ════════════════════════════════════════════════════════
+   embed-overlay.css — Embed drop-zone overlay UI
+   Orange-themed zone drop targets shown during embed drag.
+════════════════════════════════════════════════════════ */
+
+/* ── Drop zone cells ── */
+.ez-dz {
+    position: absolute;
+    display: flex;
+    border-radius: 5px;
+    transition: background .1s;
+}
+
+/* Empty zone — dashed orange outline */
+.ez-dz.dz-empty {
+    background: rgba(255,140,0,.05);
+    border: 1.5px dashed rgba(255,140,0,.30);
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-family: monospace;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: rgba(255,140,0,.35);
+}
+
+/* Center (float) zone */
+.ez-dz.dz-center {
+    background: rgba(255,140,0,.04);
+    border: 1.5px dashed rgba(255,140,0,.22);
+    color: rgba(255,140,0,.35);
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-family: monospace;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+}
+
+/* Highlighted state */
+.ez-dz.dz-empty.hl,
+.ez-dz.dz-center.hl {
+    background: rgba(255,140,0,.18);
+    border-color: #e07700;
+    border-style: solid;
+    color: #c05f00;
+}
+
+/* Occupied zone — transparent, uses sub-cells */
+.ez-dz.dz-has {
+    background: transparent;
+    border: none;
+}
+
+/* ── Sub-cells (first / tab|merge / last) ── */
+.ez-dz-sub {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    border: 1.5px dashed rgba(255,140,0,.25);
+    font-size: 8px;
+    font-family: monospace;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: rgba(255,140,0,.30);
+    transition: all .1s;
+}
+.ez-dz-sub.sub-tab { flex: 0.75; }
+.ez-dz-sub.hl {
+    background: rgba(255,140,0,.18);
+    border-color: #e07700;
+    border-style: solid;
+    color: #c05f00;
+}
