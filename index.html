@@ -4,261 +4,108 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Docking System</title>
-
-<!-- ═══════════════════════════════════════════════════
-     OPTION A — single entry point (recommended for production / bundlers)
-════════════════════════════════════════════════════ -->
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
-
-<!--
-     OPTION B — load each partial directly (useful during development
-     so browser DevTools maps errors to the exact partial file).
-     Comment out Option A and uncomment the block below.
-
-<link rel="stylesheet" href="src/css/base.css">
-<link rel="stylesheet" href="src/css/layout.css">
-<link rel="stylesheet" href="src/css/dock-header.css">
-<link rel="stylesheet" href="src/css/dock-body.css">
-<link rel="stylesheet" href="src/css/drop-indicators.css">
-<link rel="stylesheet" href="src/css/collapse.css">
-<link rel="stylesheet" href="src/css/resize.css">
-<link rel="stylesheet" href="src/css/embed-layers.css">
-<link rel="stylesheet" href="src/css/embed-overlay.css">
-<link rel="stylesheet" href="src/css/embed-card.css">
-<link rel="stylesheet" href="src/css/embed-tabgroup.css">
-<link rel="stylesheet" href="src/css/embed-zonecontainer.css">
-<link rel="stylesheet" href="src/css/embed-float.css">
-<link rel="stylesheet" href="src/css/embed-ghost.css">
-<link rel="stylesheet" href="src/css/ui.css">
--->
-
 </head>
 <body>
 
-<div id="docking-container"></div>
+<!-- ── Layout root — the docking system renders here ── -->
+<div id="layout-root"></div>
 
-<!-- ═══ TEST PANEL ═══ -->
-<div id="test-panel">
-  <div id="test-panel-hdr">
-    <span id="test-panel-title">⚙ Test Panel</span>
-    <button id="test-panel-toggle" title="Collapse">▲</button>
+<!-- ── Mode badge (shown while dragging) ── -->
+<div class="mode-badge" id="modeBadge">⬡ insert</div>
+
+<!-- ── Toast notification ── -->
+<div class="toast" id="toast"></div>
+
+<!--
+  ════════════════════════════════════════════════════════════════
+  TEST PANEL
+  Floating, draggable, collapsible panel for testing the system.
+  Each dock's props (label, contentType) are defined here.
+  ════════════════════════════════════════════════════════════════
+-->
+<div id="devpanel">
+  <div id="dph">
+    <span>⚙ Dev Panel</span>
+    <button id="dptoggle" title="Toggle panel">−</button>
   </div>
-  <div id="test-panel-body">
+  <div id="dpb">
 
-    <div class="tp-group">
-      <div class="tp-group-label">Add Dock</div>
-      <div class="tp-row">
-        <button class="tp-btn primary" onclick="addDock()">+ Dock</button>
-        <button class="tp-btn primary" onclick="addDockWithTabs()">+ Tabbed</button>
+    <!-- Add Panel buttons — each dock's props are defined here -->
+    <div>
+      <div class="tp-sl">Add Panel</div>
+      <div class="tp-grid">
+        <button class="tp-btn" data-type="chart" data-label="Chart">
+          <span class="panel-dot dot-chart"></span>Chart
+        </button>
+        <button class="tp-btn" data-type="table" data-label="Table">
+          <span class="panel-dot dot-table"></span>Table
+        </button>
+        <button class="tp-btn" data-type="text"  data-label="Text">
+          <span class="panel-dot dot-text"></span>Text
+        </button>
+        <button class="tp-btn" data-type="image" data-label="Image">
+          <span class="panel-dot dot-image"></span>Image
+        </button>
       </div>
     </div>
 
-    <div class="tp-sep"></div>
+    <!-- Live tree view -->
+    <div>
+      <div class="tp-sl">Dock Tree</div>
+      <pre id="tree-view" class="tree-view"></pre>
+    </div>
 
-    <div class="tp-group">
-      <div class="tp-group-label">Embed into Dock 1</div>
-      <div class="tp-row">
-        <button class="tp-btn" onclick="addEmbedFloat(0)" title="Add free-floating embedded dock to dock 1">Float</button>
-        <button class="tp-btn" onclick="addEmbedToZone(0,'top')" title="Embed into top zone of dock 1">Top</button>
-        <button class="tp-btn" onclick="addEmbedToZone(0,'bottom')">Bot</button>
-      </div>
-      <div class="tp-row">
-        <button class="tp-btn" onclick="addEmbedToZone(0,'left')">Left</button>
-        <button class="tp-btn" onclick="addEmbedToZone(0,'right')">Right</button>
-        <button class="tp-btn" onclick="addEmbedGroup(0)" title="Add tab group to bottom zone">Group</button>
+    <!-- Usage hints -->
+    <div>
+      <div class="tp-sl">Drag Modes</div>
+      <div class="tp-hint">
+        <strong>Drag</strong> — Insert (split)<br>
+        <strong>Ctrl+Drag</strong> — Tab group<br>
+        <strong>Shift+Drag</strong> — Embed (overlay)<br>
+        <em style="opacity:.6">Hold/release mid-drag to switch!</em>
       </div>
     </div>
 
-    <div class="tp-sep"></div>
-
-    <div class="tp-group">
-      <div class="tp-group-label">Embed into Dock 2</div>
-      <div class="tp-row">
-        <button class="tp-btn" onclick="addEmbedFloat(1)">Float</button>
-        <button class="tp-btn" onclick="addEmbedToZone(1,'top')">Top</button>
-        <button class="tp-btn" onclick="addEmbedToZone(1,'bottom')">Bot</button>
-      </div>
-      <div class="tp-row">
-        <button class="tp-btn" onclick="addEmbedToZone(1,'left')">Left</button>
-        <button class="tp-btn" onclick="addEmbedToZone(1,'right')">Right</button>
-      </div>
-    </div>
-
-    <div class="tp-sep"></div>
-
-    <div class="tp-group">
-      <div class="tp-group-label">Layout</div>
-      <button class="tp-btn" onclick="resetLayout()">↺ Reset Layout</button>
-      <button class="tp-btn" onclick="logState()">📋 Log State</button>
-    </div>
-
-    <div class="tp-sep"></div>
-
-    <div class="tp-group">
-      <div class="tp-group-label">Info</div>
-      <div style="font-size:9px;color:#3d4252;line-height:1.6;padding:2px 0;">
-        <b style="color:#5a6070">Drag ☰</b> = move dock<br>
-        <b style="color:#5a6070">Ctrl+Drag</b> = tab into dock<br>
-        <b style="color:#5a6070">Shift+Drag</b> = embed into dock<br>
-        <b style="color:#5a6070">⠿</b> = free float embed panel<br>
-        <b style="color:#5a6070">⊞</b> = dock embed panel to zone<br>
-        <b style="color:#5a6070">↗</b> = detach tab from group<br>
-        <b style="color:#5a6070">◀▲</b> = collapse dock / slot<br>
-        <b style="color:#5a6070">◀▶ ▲▼</b> = collapse float W / H
+    <div>
+      <div class="tp-sl">Reveal Headers</div>
+      <div class="tp-hint">
+        Hold <strong>Ctrl</strong>, hover panel → header<br>
+        Hold <strong>Shift</strong>, hover group → header<br>
+        Release key → all headers hide instantly
       </div>
     </div>
 
   </div>
 </div>
 
-<div id="embed-ghost"></div>
-
-<!-- Scripts in dependency order -->
-<script src="js/utils.js"></script>
-<script src="js/dom-builder.js"></script>
-<script src="js/dock-manager.js"></script>
-<script src="js/panel-manager.js"></script>
-
-<script src="js/embed-core.js"></script>
-<script src="js/embed-resize.js"></script>
-<script src="js/embed-ghost.js"></script>
-<script src="js/embed-slots.js"></script>
-<script src="js/embed-overlay.js"></script>
-<script src="js/embed-render.js"></script>
-<script src="js/embed-builders.js"></script>
-<script src="js/embed-drag-free.js"></script>
-<script src="js/embed-drag-dock.js"></script>
-<script src="js/embed-drag-move.js"></script>
-<script src="js/embed-manager.js"></script>
-<script src="js/collapse-manager.js"></script>
-
-<script src="js/drag-drop.js"></script>
-<script src="js/resize-manager.js"></script>
-<script src="js/connection-points.js"></script>
-<script src="js/DockingSystem.js"></script>
-<script src="js/index.js"></script>
-
-<script>
-/* ── Init ─────────────────────────────── */
-const dockingSystem = new DockingSystem('docking-container');
-window.dockingSystem = dockingSystem;
-
-/* ── Test panel drag ───────────────────── */
-(function() {
-  const panel  = document.getElementById('test-panel');
-  const hdr    = document.getElementById('test-panel-hdr');
-  const toggle = document.getElementById('test-panel-toggle');
-  let ox = 0, oy = 0;
-
-  hdr.addEventListener('mousedown', e => {
-    if (e.target === toggle) return;
-    e.preventDefault();
-    const r = panel.getBoundingClientRect();
-    ox = e.clientX - r.left; oy = e.clientY - r.top;
-    const mv = ev => {
-      panel.style.right = 'auto';
-      panel.style.left = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  ev.clientX - ox)) + 'px';
-      panel.style.top  = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, ev.clientY - oy)) + 'px';
-    };
-    const up = () => { document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); };
-    document.addEventListener('mousemove', mv);
-    document.addEventListener('mouseup', up);
-  });
-
-  let collapsed = false;
-  toggle.addEventListener('click', () => {
-    collapsed = !collapsed;
-    panel.classList.toggle('collapsed', collapsed);
-    toggle.textContent = collapsed ? '▼' : '▲';
-  });
-})();
-
-/* ── Test helper functions ─────────────── */
-let panelSeq = 10;
-
-function getFirstDock(idx) {
-  return dockingSystem.docks[idx || 0] || dockingSystem.docks[0];
-}
-
-function addDock() {
-  const n = ++panelSeq;
-  const panel = dockingSystem.mkPanel(`Panel ${n}`, `<div class="dock-card">Panel ${n}</div>`);
-  dockingSystem.addDock([panel], 'top');
-  dockingSystem.updateResizeHandles();
-  dockingSystem.updateConnectionPoints();
-}
-
-function addDockWithTabs() {
-  const n1 = ++panelSeq, n2 = ++panelSeq;
-  const p1 = dockingSystem.mkPanel(`Tab ${n1}`, `<div class="dock-card">Tab ${n1}</div>`);
-  const p2 = dockingSystem.mkPanel(`Tab ${n2}`, `<div class="dock-card">Tab ${n2}</div>`);
-  dockingSystem.addDock([p1, p2], 'top');
-  dockingSystem.updateResizeHandles();
-  dockingSystem.updateConnectionPoints();
-}
-
-function addEmbedFloat(dockIdx) {
-  const dock = dockingSystem.docks[dockIdx];
-  if (!dock) return;
-  const n = ++panelSeq;
-  EmbedManager.addFloat(dock, 'Float ' + n);
-}
-
-function addEmbedToZone(dockIdx, side) {
-  const dock = dockingSystem.docks[dockIdx];
-  if (!dock) return;
-  const n = ++panelSeq;
-  const slot = { id: EmbedManager.uid(), type: 'card', title: 'Embed ' + n };
-  EmbedManager._dockTo(dock, slot, side, 'last');
-  EmbedManager.renderZone(dock, side);
-  EmbedManager._updateCorners(dock);
-}
-
-function addEmbedGroup(dockIdx) {
-  const dock = dockingSystem.docks[dockIdx];
-  if (!dock) return;
-  const n1 = ++panelSeq, n2 = ++panelSeq;
-  const tg = {
-    id: EmbedManager.uid(),
-    type: 'tabgroup',
-    tabs: [
-      { id: EmbedManager.uid(), title: 'Tab ' + n1 },
-      { id: EmbedManager.uid(), title: 'Tab ' + n2 },
-    ],
-    activeId: null
-  };
-  tg.activeId = tg.tabs[0].id;
-  EmbedManager._dockTo(dock, tg, 'bottom', 'last');
-  EmbedManager.renderZone(dock, 'bottom');
-  EmbedManager._updateCorners(dock);
-}
-
-function resetLayout() {
-  dockingSystem.destroy();
-  const c = document.getElementById('docking-container');
-  c.innerHTML = '';
-  dockingSystem.docks = [];
-  dockingSystem.dockCounter = 0;
-  DockManager.createDock(dockingSystem, c);
-  DockManager.createDock(dockingSystem, c);
-  DockManager.createDock(dockingSystem, c);
-  dockingSystem.updateResizeHandles();
-  dockingSystem.updateConnectionPoints();
-}
-
-function logState() {
-  const info = dockingSystem.docks.map((d, i) => {
-    const es = d.embedState;
-    const zones = es ? Object.entries(es.zones).map(([s, z]) =>
-      z.slots.length ? `${s}:${z.slots.length}` : null
-    ).filter(Boolean).join(', ') : 'none';
-    const floats = es ? es.floats.length : 0;
-    return `Dock ${i+1}: panels=${d.panelData.length}, zones=[${zones}], floats=${floats}`;
-  });
-  console.log('=== Docking State ===\n' + info.join('\n'));
-  alert(info.join('\n'));
-}
-</script>
+<!--
+  ════════════════════════════════════════════════════════════════
+  SCRIPT LOAD ORDER
+  Dependency graph (top = no deps, bottom = depends on all above):
+    trees.js
+    tree_manager.js           ← trees.js
+    commands/parenting.js     ← trees.js, tree_manager.js
+    gui/dock_header.js        ← (browser APIs only; ctx as param)
+    gui/drag_drop_overlays.js ← calls refreshDragModeFromEvent
+    gui/kbd_shortcuts.js      ← defines refreshDragModeFromEvent,
+                                 reads dragState/state/syncOverlays/
+                                 updateBadge from main.js at runtime
+    connections.js
+    renderer.js               ← trees.js, gui/*, connections.js
+    main.js                   ← everything (defines dragState etc.)
+  ════════════════════════════════════════════════════════════════
+-->
+<script src="js/trees.js"></script>
+<script src="js/tree_manager.js"></script>
+<script src="js/commands/parenting.js"></script>
+<script src="js/gui/dock_header.js"></script>
+<script src="js/gui/drag_drop_overlays.js"></script>
+<script src="js/gui/kbd_shortcuts.js"></script>
+<script src="js/connections.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/main.js"></script>
 
 </body>
 </html>

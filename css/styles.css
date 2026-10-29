@@ -1,55 +1,586 @@
-/* ════════════════════════════════════════════════════════
-   styles.css — Master entry point
-   Imports all partials in dependency order.
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --bg:   #0a0a0f; --bg2: #12121a; --bg3: #1a1a24;
+  --fg:   #e8e8ed; --muted: #5a5a6e; --border: #2a2a3a; --card: #16161f;
+  --spl:  4px;
+  --ci:   #00ffa3; --ci-d: rgba(0,255,163,.16);
+  --ct:   #6496ff; --ct-d: rgba(100,150,255,.16);
+  --ce:   #ffaa40; --ce-d: rgba(255,170,64,.16);
+  --cchart:#00ffa3; --ctable:#6496ff; --ctext:#c480ff; --cimage:#ffaa40;
+}
 
-   Use this single file in index.html instead of 14 <link>
-   tags if you prefer one HTTP request (or are using a bundler
-   that respects @import order).
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0 }
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg); color: var(--fg);
+  width: 100vw; height: 100vh; overflow: hidden; position: relative;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
 
-   Load order rationale
-   ────────────────────
-   1. base / layout   — reset + flex scaffolding; everything else depends on these.
-   2. dock chrome     — dock-header defines @keyframes hdrIn used by embed headers.
-   3. Interaction     — drop-indicators and resize handles sit above embed layers (z:900 / z:200).
-   4. Embed layers    — DOM scaffolding (.ez, .ez-rh, .ez-float-layer, .ez-drop-overlay).
-   5. Embed overlay   — orange drop-zone UI drawn inside .ez-drop-overlay.
-   6. Embed slot types — card → tabgroup → zonecontainer (tabgroup references hdrIn from #2).
-   7. Float behaviour — builds on slot types; overrides size/position for .ec-floating.
-   8. Drag ghost      — #embed-ghost is fixed-position, independent of all other layers.
-   9. UI chrome       — #ctrl-hint and test panel; highest z-index (9999/10000).
-════════════════════════════════════════════════════════ */
+/* ── Layout Root ── */
+#layout-root {
+  width: 100%; height: 100%;
+  display: flex; position: relative; z-index: 1; overflow: hidden;
+}
 
-/* 1. Foundation */
-@import "base.css";
-@import "layout.css";
+/* ══════════════════════════════════════════
+   CONTAINER  (row / col)
+══════════════════════════════════════════ */
+.lc-container {
+  display: flex; flex: 1 1 0; overflow: hidden; min-width: 0; min-height: 0;
+}
 
-/* 2. Dock chrome */
-@import "dock-header.css";
-@import "dock-body.css";
+/* Container Wrapper — adds header + border for non-root containers */
+.lc-container-wrapper {
+  display: flex; flex-direction: column;
+  flex: 1 1 0; overflow: hidden; min-width: 0; min-height: 0;
+  background: var(--card); border: 1px solid var(--border);
+  position: relative;
+  transition: border-color .12s;
+}
+.lc-container-wrapper:hover { border-color: rgba(255,255,255,.13); }
+.lc-container-wrapper > .lc-container { flex: 1 1 0; }
 
-/* 3. Interaction overlays + collapse
-      collapse.css after drop-indicators (both use z-index context on .dock);
-      collapse.css before resize so resize handles (z:200) stay on top. */
-@import "drop-indicators.css";
-@import "collapse.css";
-@import "resize.css";
+/* ── Container header ──────────────────────────────────────────
+   Hidden by default. Shift held + hover → reveal.
+──────────────────────────────────────────────────────────── */
+.lc-container-header {
+  flex-shrink: 0; height: 0; overflow: hidden;
+  background: var(--bg3); border-bottom: none;
+  display: flex; align-items: center;
+  padding: 0; gap: 7px;
+  cursor: grab; user-select: none;
+  pointer-events: none;
+  transition: height .12s ease, padding .12s ease, border-color .12s ease;
+}
+/* .peek-header is added by kbd_shortcuts.js on Shift+hover; removed on mouseleave */
+.lc-container-wrapper.peek-header > .lc-container-header {
+  height: 34px; padding: 0 8px 0 10px;
+  border-bottom: 1px solid var(--border);
+  pointer-events: all;
+}
+.lc-container-wrapper.peek-header > .lc-container-header .header-cmds { opacity: 1; }
+.lc-container-header:active { cursor: grabbing; }
 
-/* 4. Embed system layers (DOM scaffolding) */
-@import "embed-layers.css";
+/* Container type badge inside header */
+.container-type-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px;
+  font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  background: rgba(255,255,255,.06); border: 1px solid var(--border);
+  border-radius: 3px; padding: 2px 5px; color: var(--muted);
+  flex-shrink: 0;
+}
 
-/* 5. Embed drop-zone overlay UI */
-@import "embed-overlay.css";
+/* Collapse states for container wrappers — header always visible when collapsed */
+.lc-container-wrapper.col-h,
+.lc-container-wrapper.col-v { flex: 0 0 34px !important; overflow: hidden; }
+.lc-container-wrapper.col-h > .lc-container,
+.lc-container-wrapper.col-v > .lc-container { display: none; }
+/* Force header visible when collapsed */
+.lc-container-wrapper.col-h .lc-container-header,
+.lc-container-wrapper.col-v .lc-container-header {
+  height: 34px !important; padding: 0 8px 0 10px !important;
+  border-bottom: 1px solid var(--border) !important;
+  pointer-events: all !important; overflow: visible !important;
+}
+.lc-container-wrapper.col-h .lc-container-header .header-cmds,
+.lc-container-wrapper.col-v .lc-container-header .header-cmds { opacity: 1 !important; }
 
-/* 6. Embed slot types */
-@import "embed-card.css";
-@import "embed-tabgroup.css";
-@import "embed-zonecontainer.css";
+/* ══════════════════════════════════════════
+   PANEL
+══════════════════════════════════════════ */
+.lc-panel {
+  flex: 1 1 0; min-width: 60px; min-height: 60px;
+  background: var(--card); border: 1px solid var(--border);
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: border-color .12s, opacity .15s;
+}
+.lc-panel:hover { border-color: rgba(255,255,255,.13); }
 
-/* 7. Float behaviour (extends slot types) */
-@import "embed-float.css";
+/* ── Panel header ──────────────────────────────────────────────
+   Hidden by default (height:0). Revealed when:
+   a) .peek-header added by kbd_shortcuts.js (Ctrl+hover)   → Ctrl peek
+   b) panel is collapsed                                     → always show
+   Float panel headers are always visible.
+   .peek-header stays until mouse leaves the dock (mouseleave),
+   NOT until the Ctrl key is released.
+──────────────────────────────────────────────────────────── */
+.lc-panel > .lc-panel-header {
+  flex-shrink: 0; height: 0; overflow: hidden;
+  background: var(--bg2); border-bottom: none;
+  display: flex; align-items: center;
+  padding: 0; gap: 7px;
+  cursor: grab; user-select: none;
+  pointer-events: none;
+  transition: height .12s ease, padding .12s ease, border-color .12s ease;
+}
+/* .peek-header added by kbd_shortcuts.js on Ctrl+hover; removed on mouseleave */
+.lc-panel.peek-header > .lc-panel-header {
+  height: 34px; padding: 0 8px 0 10px;
+  border-bottom: 1px solid var(--border);
+  pointer-events: all;
+}
+.lc-panel.peek-header > .lc-panel-header .header-cmds { opacity: 1; }
 
-/* 8. Drag ghost */
-@import "embed-ghost.css";
+/* Float panel headers: always visible (independent movable windows) */
+.embed-float > .lc-panel-header {
+  flex-shrink: 0; height: 34px; overflow: visible;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 8px 0 10px; gap: 7px;
+  cursor: grab; user-select: none; pointer-events: all;
+}
+.lc-panel-header:active { cursor: grabbing; }
 
-/* 9. UI chrome */
-@import "ui.css";
+/* Panel body */
+.lc-panel-body {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; color: var(--muted); overflow: hidden; padding: 16px;
+}
+.body-icon { opacity: .18; }
+.body-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: .06em; color: var(--muted);
+}
+
+/* Dots */
+.panel-dot, .tab-dot { border-radius: 50%; flex-shrink: 0; }
+.panel-dot { width: 8px; height: 8px; }
+.tab-dot   { width: 6px; height: 6px; }
+.dot-chart { background: var(--cchart); box-shadow: 0 0 5px var(--cchart); }
+.dot-table { background: var(--ctable); box-shadow: 0 0 5px var(--ctable); }
+.dot-text  { background: var(--ctext);  box-shadow: 0 0 5px var(--ctext);  }
+.dot-image { background: var(--cimage); box-shadow: 0 0 5px var(--cimage); }
+.dot-panel { background: var(--muted);  }
+.dot-group { background: var(--border); box-shadow: 0 0 5px var(--muted); }
+
+.panel-title {
+  flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: .06em; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Header commands — hidden until the header itself is revealed */
+.header-cmds {
+  display: flex; align-items: center; gap: 2px;
+  opacity: 0; transition: opacity .12s;
+}
+/* Float panel headers: show cmds on hover */
+.embed-float .lc-panel-header:hover .header-cmds { opacity: 1; }
+/* Embed header: show cmds when header is revealed (Shift+hover) */
+.lc-embed.peek-header .lc-embed-header .header-cmds { opacity: 1; }
+
+.cmd-btn {
+  width: 20px; height: 20px; border: none; background: transparent;
+  border-radius: 4px; color: var(--muted); font-size: 11px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .1s, color .1s; line-height: 1;
+}
+.cmd-btn:hover { background: rgba(255,255,255,.1); color: var(--fg); }
+.cmd-btn.danger:hover { background: rgba(255,60,60,.2); color: #ff6060; }
+
+.panel-grip {
+  color: var(--muted); opacity: .4; flex-shrink: 0;
+  display: flex; align-items: center;
+}
+
+/* Collapse states — header always visible when collapsed (needed to expand) */
+.lc-panel.col-h, .lc-panel.col-v { flex: 0 0 34px !important; overflow: hidden; }
+.lc-panel.col-h .lc-panel-body, .lc-panel.col-v .lc-panel-body { display: none; }
+.lc-panel.col-h > .lc-panel-header, .lc-panel.col-v > .lc-panel-header {
+  height: 34px !important; padding: 0 8px 0 10px !important;
+  border-bottom: 1px solid var(--border) !important;
+  pointer-events: all !important; overflow: visible !important;
+}
+.lc-panel.col-h > .lc-panel-header .header-cmds,
+.lc-panel.col-v > .lc-panel-header .header-cmds { opacity: 1 !important; }
+
+/* ══════════════════════════════════════════
+   SPLITTERS
+══════════════════════════════════════════ */
+.lc-splitter {
+  flex-shrink: 0; background: var(--border);
+  position: relative; z-index: 2; transition: background .1s;
+}
+.lc-splitter.vertical   { width:  var(--spl); cursor: ew-resize; }
+.lc-splitter.horizontal { height: var(--spl); cursor: ns-resize; }
+.lc-splitter:hover, .lc-splitter.resizing { background: var(--ci); }
+
+/* Connection dots (splitter intersections) */
+.conn-dot {
+  position: fixed; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--ci); border: 2px solid var(--bg2); z-index: 50;
+  transform: translate(-50%,-50%);
+  transition: transform .1s, box-shadow .1s; pointer-events: all;
+}
+.conn-dot:hover, .conn-dot.dragging {
+  transform: translate(-50%,-50%) scale(1.5);
+  box-shadow: 0 0 8px var(--ci); cursor: crosshair;
+}
+
+/* ══════════════════════════════════════════
+   TABS
+══════════════════════════════════════════ */
+.lc-tabs {
+  flex: 1 1 0; display: flex; position: relative;
+  overflow: hidden; min-width: 0; min-height: 0;
+}
+.lc-tabs-top    { flex-direction: column; }
+.lc-tabs-bottom { flex-direction: column-reverse; }
+.lc-tabs-left   { flex-direction: row; }
+.lc-tabs-right  { flex-direction: row-reverse; }
+
+.lc-tabs-bar {
+  flex-shrink: 0; background: var(--bg2);
+  display: flex; gap: 2px; padding: 4px;
+  border-color: var(--border); border-style: solid;
+  overflow: auto; scrollbar-width: none;
+}
+.lc-tabs-bar::-webkit-scrollbar { display: none; }
+/* Horizontal bars: fixed 34px height, scrolls horizontally */
+.lc-tabs-bar-horiz {
+  flex-direction: row; border-width: 0 0 1px 0;
+  max-height: 34px; overflow-x: auto; overflow-y: hidden;
+}
+.lc-tabs-bottom .lc-tabs-bar-horiz { border-width: 1px 0 0 0; }
+/* Vertical bars: auto width (fits longest tab label), scrolls vertically */
+.lc-tabs-bar-vert {
+  flex-direction: column; border-width: 0 1px 0 0;
+  min-width: 100px; max-width: 180px; overflow-x: hidden; overflow-y: auto;
+}
+.lc-tabs-right .lc-tabs-bar-vert { border-width: 0 0 0 1px; }
+
+/* ── Tabs-group drag handle & commands ─────────────────────────
+   Hidden by default. Shift held + hover → reveal.
+──────────────────────────────────────────────────────────── */
+.tabs-group-handle {
+  flex-shrink: 0; width: 22px; height: 22px; border-radius: 4px;
+  align-items: center; justify-content: center;
+  color: var(--muted); opacity: .45; cursor: grab;
+  transition: opacity .1s, background .1s;
+  align-self: center;
+  display: none;   /* hidden until Shift+hover */
+}
+.lc-tabs.peek-header .tabs-group-handle { display: flex; }
+.tabs-group-handle:hover { opacity: 1; background: rgba(255,255,255,.08); }
+.tabs-group-handle:active { cursor: grabbing; }
+
+.tabs-group-cmds {
+  margin-left: auto; display: none;   /* hidden until Shift+hover */
+  align-items: center; gap: 2px;
+  flex-shrink: 0;
+}
+.lc-tabs.peek-header .tabs-group-cmds { display: flex; opacity: 1; }
+
+.lc-tab {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 8px; border-radius: 6px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: var(--muted); user-select: none; white-space: nowrap;
+  border: 1px solid transparent; transition: background .1s, color .1s;
+}
+.lc-tab:hover  { background: rgba(255,255,255,.06); color: var(--fg); }
+.lc-tab.active { background: rgba(255,255,255,.08); border-color: var(--border); color: var(--fg); }
+
+/* Tab drag grip — always visible, grab cursor */
+.tab-drag-grip {
+  font-size: 10px; color: var(--muted); opacity: .4; cursor: grab;
+  flex-shrink: 0; line-height: 1; user-select: none;
+  transition: opacity .1s;
+}
+.lc-tab:hover .tab-drag-grip { opacity: .8; }
+.tab-drag-grip:active { cursor: grabbing; }
+.tab-label { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+
+.tab-close-btn {
+  width: 16px; height: 16px; border: none; background: transparent;
+  border-radius: 3px; color: var(--muted); font-size: 10px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .1s, background .1s;
+}
+.lc-tab:hover .tab-close-btn { opacity: 1; }
+.tab-close-btn:hover { background: rgba(255,60,60,.25); color: #ff6060; }
+
+/* Vertical tab bar: full-width tabs with label and close button */
+.lc-tabs-bar-vert .lc-tab {
+  width: 100%; white-space: nowrap;
+}
+/* Group cmds in vertical bar stack vertically */
+.lc-tabs-bar-vert .tabs-group-cmds {
+  flex-direction: column; margin-left: 0; margin-top: auto;
+}
+
+.lc-tabs-content {
+  flex: 1 1 0; display: flex; overflow: hidden;
+  position: relative; min-width: 0; min-height: 0;
+}
+.lc-tab-body {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px;
+}
+
+/* Collapse states for tabs — bar always visible when collapsed */
+.lc-tabs.col-h, .lc-tabs.col-v { flex: 0 0 34px !important; overflow: hidden; }
+.lc-tabs.col-h .lc-tabs-content,
+.lc-tabs.col-v .lc-tabs-content { display: none; }
+/* Show group controls on collapsed tab bar */
+.lc-tabs.col-h .tabs-group-handle,
+.lc-tabs.col-v .tabs-group-handle { display: flex !important; }
+.lc-tabs.col-h .tabs-group-cmds,
+.lc-tabs.col-v .tabs-group-cmds  { display: flex !important; opacity: 1 !important; }
+
+/* ══════════════════════════════════════════
+   EMBED PARENT
+══════════════════════════════════════════ */
+.lc-embed {
+  flex: 1 1 0; position: relative; overflow: hidden; min-width: 0; min-height: 0;
+}
+
+/* Background (host panel content, dimmed) */
+.embed-bg {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; z-index: 0; background: var(--card);
+}
+/* Embed header: position:absolute, direct child of .lc-embed (NOT inside embed-bg).
+   Appended AFTER zones so z-index:6 in .lc-embed's stacking context beats zones (z:2)
+   and floats (z:5). Hidden by default; appears when .peek-header is on .lc-embed. */
+.lc-embed-header {
+  position: absolute; top: 0; left: 0; right: 0; height: 34px;
+  z-index: 6;
+  background: rgba(18,18,26,.92); backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 8px 0 10px; gap: 7px; cursor: grab; user-select: none;
+  opacity: 0; pointer-events: none;
+  transition: opacity .15s ease;
+}
+/* .peek-header → embed header overlays on top of zones and floats */
+.lc-embed.peek-header > .lc-embed-header {
+  opacity: 1; pointer-events: all;
+}
+.lc-embed.peek-header > .lc-embed-header .header-cmds { opacity: 1; }
+.lc-embed-header:active { cursor: grabbing; }
+.embed-bg-body {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px; opacity: .25;
+}
+
+/* Embedded zone panels */
+.embed-zone {
+  position: absolute; z-index: 2; background: var(--bg2);
+  border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden;
+}
+.embed-zone-top    { top: 0; left: 0; right: 0; }
+.embed-zone-bottom { bottom: 0; left: 0; right: 0; }
+.embed-zone-left   { left: 0; }
+.embed-zone-right  { right: 0; }
+
+/* ── Embed corner dots (2-axis resize handles) ──
+   Placed at the intersection point of two adjacent occupied zone edges.
+   Style matches the splitter connection dots in the main layout. */
+.embed-corner-dot {
+  position: absolute;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--ci); border: 2px solid var(--bg2);
+  z-index: 7;          /* above header (z:6), floats (z:5), everything */
+  transform: translate(-50%, -50%);
+  transition: transform .1s, box-shadow .1s;
+  pointer-events: all;
+}
+.embed-corner-dot:hover {
+  transform: translate(-50%, -50%) scale(1.5);
+  box-shadow: 0 0 8px var(--ci);
+}
+
+/* Resize handles on zones */
+.embed-rh { position: absolute; z-index: 10; background: transparent; transition: background .1s; }
+.embed-rh:hover { background: var(--ci); }
+.rh-bottom { left:0; right:0; bottom:0; height:4px; cursor:ns-resize; }
+.rh-top    { left:0; right:0; top:0;    height:4px; cursor:ns-resize; }
+.rh-right  { top:0; bottom:0; right:0;  width:4px;  cursor:ew-resize; }
+.rh-left   { top:0; bottom:0; left:0;   width:4px;  cursor:ew-resize; }
+
+/* Container child count badge */
+.container-child-count {
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 8px;
+  background: rgba(255,255,255,.05); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1px 6px; color: var(--muted);
+  opacity: .7;
+}
+
+/* Float panels (inside embed) */
+.embed-float {
+  position: absolute; z-index: 5; background: var(--card);
+  border: 1px solid var(--ci); border-radius: 8px;
+  overflow: hidden; min-width: 120px; min-height: 80px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.5);
+  display: flex; flex-direction: column;
+}
+.embed-float-collapsed { height: 34px !important; overflow: hidden; }
+.embed-float-collapsed .lc-panel-body { display: none; }
+
+/* Float panel resize handles — 8 directions */
+.embed-float-rh {
+  position: absolute; z-index: 20; background: transparent;
+  transition: background .1s, opacity .1s;
+}
+.embed-float-rh:hover { background: rgba(0,255,163,.35); }
+/* Edges */
+.float-rh-e  { top: 46px; right: 0;  bottom: 12px; width: 5px;  cursor: ew-resize; }
+.float-rh-w  { top: 46px; left: 0;   bottom: 12px; width: 5px;  cursor: ew-resize; }
+.float-rh-s  { left: 12px; right: 12px; bottom: 0; height: 5px; cursor: ns-resize; }
+.float-rh-n  { left: 12px; right: 12px; top: 34px; height: 5px; cursor: ns-resize; }
+/* Corners */
+.float-rh-se { right:0; bottom:0; width:12px; height:12px; cursor:nwse-resize;
+  background:rgba(0,255,163,.14); border-top:1px solid rgba(0,255,163,.4);
+  border-left:1px solid rgba(0,255,163,.4); border-radius:2px 0 0 0; opacity:.6; }
+.float-rh-sw { left:0;  bottom:0; width:12px; height:12px; cursor:nesw-resize;
+  background:rgba(0,255,163,.14); border-top:1px solid rgba(0,255,163,.4);
+  border-right:1px solid rgba(0,255,163,.4); border-radius:0 2px 0 0; opacity:.6; }
+.float-rh-ne { right:0; top:34px; width:12px; height:12px; cursor:nesw-resize;
+  background:rgba(0,255,163,.14); border-bottom:1px solid rgba(0,255,163,.4);
+  border-left:1px solid rgba(0,255,163,.4); border-radius:0 0 0 2px; opacity:.6; }
+.float-rh-nw { left:0;  top:34px; width:12px; height:12px; cursor:nwse-resize;
+  background:rgba(0,255,163,.14); border-bottom:1px solid rgba(0,255,163,.4);
+  border-right:1px solid rgba(0,255,163,.4); border-radius:0 0 2px 0; opacity:.6; }
+.float-rh-se:hover,.float-rh-sw:hover,
+.float-rh-ne:hover,.float-rh-nw:hover { opacity:1; background:rgba(0,255,163,.3); }
+
+/* Embed collapse states — always show the header strip.
+   Since the header is position:absolute it always overlays at top:0. */
+.lc-embed.col-h, .lc-embed.col-v { flex: 0 0 34px !important; overflow: hidden; }
+.lc-embed.col-h > .lc-embed-header,
+.lc-embed.col-v > .lc-embed-header {
+  opacity: 1 !important; pointer-events: all !important;
+}
+.lc-embed.col-h > .lc-embed-header .header-cmds,
+.lc-embed.col-v > .lc-embed-header .header-cmds { opacity: 1 !important; }
+
+/* ══════════════════════════════════════════
+   DROP OVERLAY
+══════════════════════════════════════════ */
+.lc-drop-overlay {
+  position: absolute; inset: 0; display: grid;
+  grid-template-columns: 1fr 2fr 1fr; grid-template-rows: 1fr 2fr 1fr;
+  z-index: 20; background: rgba(10,10,15,.88); backdrop-filter: blur(6px);
+  opacity: 0; visibility: hidden; transition: opacity .16s; pointer-events: none;
+}
+.lc-drop-overlay.active { opacity: 1; visibility: visible; pointer-events: all; }
+.lc-tabs  > .lc-drop-overlay,
+.lc-embed > .lc-drop-overlay { z-index: 25; }
+
+.dz-corner { /* empty grid cells */ }
+.lc-dz { display: flex; align-items: center; justify-content: center; position: relative; }
+.dz-top    { grid-column: 2; grid-row: 1; }
+.dz-left   { grid-column: 1; grid-row: 2; }
+.dz-center { grid-column: 2; grid-row: 2; }
+.dz-right  { grid-column: 3; grid-row: 2; }
+.dz-bottom { grid-column: 2; grid-row: 3; }
+
+.dz-inner {
+  position: absolute; inset: 6px; border-radius: 8px;
+  border: 2px dashed rgba(255,255,255,.1); background: rgba(255,255,255,.02);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .14s; pointer-events: none;
+}
+.dz-lbl {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: .12em; color: var(--muted);
+  background: rgba(0,0,0,.4); padding: 4px 10px; border-radius: 4px;
+  pointer-events: none; transition: all .14s;
+}
+
+.lc-dz.drag-over .dz-inner { inset: 3px; }
+.lc-dz.drag-over .dz-lbl   { transform: scale(1.06); }
+
+/* Mode-dependent zone colours */
+.lc-drop-overlay[data-mode="insert"] .lc-dz.drag-over .dz-inner { border-color:var(--ci); background:var(--ci-d); }
+.lc-drop-overlay[data-mode="insert"] .lc-dz.drag-over .dz-lbl   { color:var(--ci); background:rgba(0,255,163,.1); }
+.lc-drop-overlay[data-mode="tab"]    .lc-dz.drag-over .dz-inner { border-color:var(--ct); background:var(--ct-d); }
+.lc-drop-overlay[data-mode="tab"]    .lc-dz.drag-over .dz-lbl   { color:var(--ct); background:rgba(100,150,255,.1); }
+.lc-drop-overlay[data-mode="embed"]  .lc-dz.drag-over .dz-inner { border-color:var(--ce); background:var(--ce-d); }
+.lc-drop-overlay[data-mode="embed"]  .lc-dz.drag-over .dz-lbl   { color:var(--ce); background:rgba(255,170,64,.1); }
+
+/* ══════════════════════════════════════════
+   MODE BADGE
+══════════════════════════════════════════ */
+.mode-badge {
+  position: fixed; top: 14px; right: 14px;
+  padding: 5px 12px; border-radius: 20px; border: 1px solid;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: .12em;
+  opacity: 0; transition: opacity .18s; z-index: 300; pointer-events: none;
+}
+.mode-badge.show { opacity: 1; }
+.mode-insert { color:var(--ci); border-color:var(--ci); background:rgba(0,255,163,.08); }
+.mode-tab    { color:var(--ct); border-color:var(--ct); background:rgba(100,150,255,.08); }
+.mode-embed  { color:var(--ce); border-color:var(--ce); background:rgba(255,170,64,.08); }
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 22px; left: 50%;
+  transform: translateX(-50%) translateY(14px);
+  padding: 7px 18px; background: var(--card);
+  border: 1px solid var(--ci); border-radius: 40px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--fg);
+  opacity: 0; transition: all .24s cubic-bezier(.175,.885,.32,1.275);
+  z-index: 300; pointer-events: none; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast .hl  { color: var(--ci); font-weight: 700; }
+
+/* ══════════════════════════════════════════
+   DEV / TEST PANEL
+══════════════════════════════════════════ */
+#devpanel {
+  position: fixed; right: 14px; bottom: 14px; width: 240px;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  z-index: 400; box-shadow: 0 8px 32px rgba(0,0,0,.5); overflow: hidden;
+}
+#dph {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; background: var(--bg3); border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500;
+  letter-spacing: .1em; color: var(--muted); cursor: move; user-select: none;
+}
+#dph button {
+  border: none; background: transparent; color: var(--muted);
+  font-size: 14px; cursor: pointer; line-height: 1; padding: 0 2px;
+}
+#dpb { padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+.tp-sl {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+}
+.tp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.tp-btn {
+  border: 1px solid var(--border); background: var(--card); border-radius: 6px;
+  padding: 6px 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: var(--muted); cursor: pointer; display: flex; align-items: center;
+  gap: 5px; transition: border-color .1s, color .1s;
+}
+.tp-btn:hover { border-color: var(--ci); color: var(--ci); }
+.tree-view {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  line-height: 1.7; color: var(--muted); max-height: 180px; overflow-y: auto;
+  white-space: pre; scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.tp-hint {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  line-height: 1.8; color: var(--muted);
+}
+.tp-hint strong { color: var(--fg); }
