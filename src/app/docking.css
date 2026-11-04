@@ -1,0 +1,862 @@
+/*
+ * Docking System UI — styles
+ * ===========================
+ * Port of multi-mode-ui-docking-system/css/styles.css, retargeted to the
+ * theme-registry CSS variables (--dock-*). The JS system hardcodes colors;
+ * here every color flows through a variable so themes + token overrides work.
+ */
+
+/* Default theme (midnight) fallbacks — overridden at runtime by applyThemeToDocument. */
+:root {
+  --dock-bg: #0a0a0f;
+  --dock-bg-alt: #11111a;
+  --dock-bg-muted: #1a1a24;
+  --dock-fg: #e6e6ef;
+  --dock-fg-muted: #8a8a99;
+  --dock-border: #262633;
+  --dock-card: #13131c;
+  --dock-spl: 4px;
+  --dock-ci: #00ffa3;
+  --dock-ct: #6496ff;
+  --dock-ce: #ffaa40;
+  --dock-dot-chart: #5ad6a0;
+  --dock-dot-table: #c084fc;
+  --dock-dot-text: #fbbf24;
+  --dock-dot-image: #f87171;
+  --dock-dot-panel: #60a5fa;
+  --dock-dot-group: #9ca3af;
+  --dock-header-bg: rgba(0, 0, 0, 0.35);
+  --dock-overlay-bg: rgba(10, 10, 15, 0.88);
+  --dock-radius: 8px;
+  --dock-anim: 120ms;
+  --dock-font: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --dock-overlay-blur: 6px;
+}
+
+.dock-root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: var(--dock-bg);
+  color: var(--dock-fg);
+  font-family: var(--dock-font);
+  overflow: hidden;
+}
+
+.dock-canvas {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  display: flex;
+}
+
+/* ---------- containers ---------- */
+.lc-container {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+.lc-container[data-dir="row"] { flex-direction: row; }
+.lc-container[data-dir="col"] { flex-direction: column; }
+
+.lc-container-wrapper {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  border: 1px solid var(--dock-border);
+  border-radius: var(--dock-radius);
+  overflow: hidden;
+  background: var(--dock-bg-alt);
+  position: relative;
+}
+.lc-container-wrapper > .lc-container { flex: 1 1 auto; }
+
+/* active dock highlight — the focused dock gets a distinct border */
+.lc-panel.dock-active,
+.lc-container-wrapper.dock-active,
+.lc-tabs.dock-active,
+.lc-embed.dock-active {
+  outline: 2px solid var(--dock-ci);
+  outline-offset: -2px;
+}
+
+/* multi-selected dock highlight (Ctrl+Click / Shift+Click on corner buttons) */
+.lc-panel.dock-selected,
+.lc-container-wrapper.dock-selected,
+.lc-tabs.dock-selected,
+.lc-embed.dock-selected {
+  outline: 2px solid var(--dock-ct);
+  outline-offset: -2px;
+}
+/* when both active and selected, selected takes priority (blue over green) */
+.lc-panel.dock-active.dock-selected,
+.lc-container-wrapper.dock-active.dock-selected,
+.lc-tabs.dock-active.dock-selected,
+.lc-embed.dock-active.dock-selected {
+  outline-color: var(--dock-ct);
+}
+
+/* old hidden headers removed — the DockCornerBar is the sole per-dock control */
+
+/* ---------- panels ---------- */
+.lc-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  border: 1px solid var(--dock-border);
+  border-radius: var(--dock-radius);
+  overflow: hidden;
+  background: var(--dock-card);
+  position: relative;
+}
+.lc-panel-body {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-direction: column;
+  color: var(--dock-fg-muted);
+  overflow: auto;
+}
+.body-icon { width: 48px; height: 48px; opacity: 0.55; }
+.body-label { font-size: 13px; letter-spacing: 0.02em; }
+
+.panel-dot,
+.tab-dot {
+  width: 8px; height: 8px; border-radius: 999px; flex: 0 0 auto;
+}
+.dot-chart { background: var(--dock-dot-chart); }
+.dot-table { background: var(--dock-dot-table); }
+.dot-text { background: var(--dock-dot-text); }
+.dot-image { background: var(--dock-dot-image); }
+.dot-panel { background: var(--dock-dot-panel); }
+.dot-group { background: var(--dock-dot-group); }
+
+.panel-title {
+  flex: 1 1 auto;
+  font-size: 12px;
+  color: var(--dock-fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-cmds { display: flex; gap: 4px; align-items: center; }
+.cmd-btn {
+  width: 22px; height: 22px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 5px;
+  background: transparent;
+  border: none;
+  color: var(--dock-fg-muted);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  transition: background var(--dock-anim) ease, color var(--dock-anim) ease;
+}
+.cmd-btn:hover { background: var(--dock-bg-muted); color: var(--dock-fg); }
+.cmd-btn.danger:hover { color: #f87171; }
+.panel-grip { opacity: 0.4; cursor: grab; }
+
+/* ---------- tabs ---------- */
+.lc-tabs {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--dock-border);
+  border-radius: var(--dock-radius);
+  overflow: hidden;
+  background: var(--dock-bg-alt);
+  position: relative;
+}
+
+/* dock corner bar — always visible toggle at top-right of each dock */
+.dock-corner-bar {
+  pointer-events: none;
+}
+.dock-corner-bar > * {
+  pointer-events: auto;
+}
+.dock-corner-toggle {
+  opacity: 0.45;
+}
+.dock-corner-toggle:hover,
+.lc-panel:hover .dock-corner-toggle,
+.lc-container-wrapper:hover .dock-corner-toggle,
+.lc-tabs:hover .dock-corner-toggle,
+.lc-embed:hover .dock-corner-toggle {
+  opacity: 1;
+  background: var(--dock-bg-muted);
+  color: var(--dock-fg);
+}
+.dock-corner-grip:hover {
+  background: var(--dock-bg) !important;
+  color: var(--dock-ci) !important;
+}
+.dock-corner-cmd:hover {
+  background: var(--dock-bg) !important;
+}
+.dock-corner-cmd.danger:hover {
+  color: #f87171 !important;
+}
+/* keep the corner bar visible even when the dock is collapsed */
+.col-h .dock-corner-bar, .col-v .dock-corner-bar {
+  z-index: 10;
+}
+.lc-tabs-bar {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  flex: 0 0 auto;
+  background: var(--dock-bg-muted);
+  border-bottom: 1px solid var(--dock-border);
+  min-height: 34px;
+  align-items: center;
+}
+.lc-tabs-bar-horiz { flex-direction: row; overflow-x: hidden; overflow-y: hidden; }
+.lc-tabs-bar-vert { flex-direction: column; overflow-y: hidden; overflow-x: hidden; min-width: 28px; }
+.lc-tabs-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  position: relative;
+}
+/* Panel rendered inside tab content — remove the double border (the tabs group
+   already has a border) so the panel blends seamlessly into the tab content. */
+.lc-tabs-content > .lc-panel {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+.lc-tabs-content > .lc-panel > .lc-panel-body {
+  background: var(--dock-bg-alt);
+}
+.lc-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--dock-fg-muted);
+  border: 1px solid transparent;
+  transition: background var(--dock-anim) ease, color var(--dock-anim) ease;
+  flex: 0 0 auto;
+  min-width: 28px;
+}
+.lc-tab:hover { background: var(--dock-bg); color: var(--dock-fg); }
+.lc-tab.active { background: var(--dock-card); color: var(--dock-fg); border-color: var(--dock-border); }
+/* Tab children flex rules — the close button must ALWAYS sit at the tab's edge
+   (right edge), even when the bar is resized narrow or wide. To achieve this:
+   - the label grows/shrinks (flex: 1 1 auto, min-width: 0) so it fills any
+     leftover space (pushing the close button to the edge) OR truncates with an
+     ellipsis when there is not enough room.
+   - the close button, dot, and drag-grip are flex: 0 0 auto so they never
+     shrink (the close button can't be squeezed off the edge). */
+.tab-drag-grip { flex: 0 0 auto; cursor: grab; opacity: 0.5; font-size: 12px; }
+.tab-drag-grip:hover { opacity: 1; }
+.lc-tabs-bar .tab-dot { flex: 0 0 auto; }
+.tab-label {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+/* horizontal bar: cap the label so a very long title doesn't make one tab
+   dominate the row (the bar scrolls horizontally if many tabs overflow) */
+.lc-tabs-bar-horiz .tab-label { max-width: 160px; }
+/* vertical bar: no cap — the label fills the tab's (resized) width so the
+   close button always parks at the right edge */
+.lc-tabs-bar-vert .tab-label { max-width: none; }
+.tab-close-btn {
+  flex: 0 0 auto;
+  width: 16px; height: 16px;
+  border-radius: 4px;
+  background: transparent;
+  border: none;
+  color: var(--dock-fg-muted);
+  cursor: pointer;
+  font-size: 11px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.tab-close-btn:hover { background: var(--dock-bg); color: #f87171; }
+
+/* tab reorder drop target */
+.lc-tab.tab-drop-target {
+  border-color: var(--dock-ct);
+  background: color-mix(in srgb, var(--dock-ct) 15%, transparent);
+}
+.lc-tab:active { cursor: grabbing; }
+
+/* tabs bar resize handle */
+.tabs-bar-resize {
+  flex: 0 0 4px;
+  background: var(--dock-border);
+  z-index: 3;
+}
+.tabs-bar-resize-h { cursor: ns-resize; height: 4px; }
+.tabs-bar-resize-v { cursor: ew-resize; width: 4px; }
+.tabs-bar-resize:hover { background: var(--dock-ci); }
+
+.lc-tab-body {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--dock-fg-muted);
+}
+
+/* ---------- embed ---------- */
+.lc-embed {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--dock-border);
+  border-radius: var(--dock-radius);
+  overflow: hidden;
+  background: var(--dock-card);
+  position: relative;
+}
+.embed-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--dock-fg-muted);
+  opacity: 0.35;
+  pointer-events: none;
+}
+.embed-zone {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+}
+/* flex-direction matches the zone's strip orientation so a collapsed child
+ * (col-h narrow / col-v short) sits naturally inside without distortion:
+ *   top/bottom = horizontal strip → column (child collapses to col-v, 34px tall)
+ *   left/right = vertical strip   → row    (child collapses to col-h, 34px wide) */
+.embed-zone-top, .embed-zone-bottom { flex-direction: column; }
+.embed-zone-left, .embed-zone-right { flex-direction: row; }
+.embed-zone-top    { top: 0; left: 0; right: 0; }
+.embed-zone-bottom { bottom: 0; left: 0; right: 0; }
+.embed-zone-left   { left: 0; top: 0; bottom: 0; }
+.embed-zone-right  { right: 0; top: 0; bottom: 0; }
+
+/* inner wrapper that carries the embed-padding inset (between the embed
+ * border and its zones/floats/bg). The DockCornerBar + DropOverlay stay
+ * outside this wrapper so they pin to the embed's outer bounds. */
+.embed-inner {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.embed-rh {
+  position: absolute;
+  z-index: 3;
+  background: var(--dock-border);
+}
+.rh-top, .rh-bottom { left: 0; right: 0; height: 4px; cursor: ns-resize; }
+.rh-top { bottom: 0; }
+.rh-bottom { top: 0; }
+.rh-left, .rh-right { top: 0; bottom: 0; width: 4px; cursor: ew-resize; }
+.rh-left { right: 0; }
+.rh-right { left: 0; }
+
+.embed-corner-dot {
+  position: absolute;
+  width: 10px; height: 10px;
+  border-radius: 999px;
+  background: var(--dock-border);
+  z-index: 4;
+}
+
+.embed-float {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--dock-border);
+  border-radius: var(--dock-radius);
+  overflow: hidden;
+  background: var(--dock-card);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.embed-float > .lc-panel-header { display: flex; cursor: grab; }
+
+/* float move bar — thin drag handle at the top of a floating dock */
+.embed-float-movebar {
+  flex: 0 0 20px;
+  background: var(--dock-bg-muted);
+  border-bottom: 1px solid var(--dock-border);
+  cursor: grab;
+  border-radius: var(--dock-radius) var(--dock-radius) 0 0;
+}
+.embed-float-movebar:hover { background: var(--dock-bg); }
+.embed-float-movebar:active { cursor: grabbing; }
+
+/* auto-collapse button active state */
+.dock-corner-autocollapse-on {
+  background: color-mix(in srgb, var(--dock-ci) 15%, var(--dock-bg-muted)) !important;
+}
+.embed-float-collapsed { height: 34px !important; overflow: hidden; }
+.embed-float-collapsed > .lc-panel-body { display: none; }
+
+.embed-float-rh {
+  position: absolute;
+  background: transparent;
+  z-index: 6;
+}
+.float-rh-e, .float-rh-w { top: 0; bottom: 0; width: 6px; cursor: ew-resize; }
+.float-rh-e { right: -3px; }
+.float-rh-w { left: -3px; }
+.float-rh-n, .float-rh-s { left: 0; right: 0; height: 6px; cursor: ns-resize; }
+.float-rh-n { top: -3px; }
+.float-rh-s { bottom: -3px; }
+.float-rh-ne, .float-rh-nw, .float-rh-se, .float-rh-sw {
+  width: 10px; height: 10px;
+}
+.float-rh-ne { top: -3px; right: -3px; cursor: nesw-resize; }
+.float-rh-nw { top: -3px; left: -3px; cursor: nwse-resize; }
+.float-rh-se { bottom: -3px; right: -3px; cursor: nwse-resize; }
+.float-rh-sw { bottom: -3px; left: -3px; cursor: nesw-resize; }
+
+.lc-embed-header {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 7;
+  border-bottom: 1px solid var(--dock-border);
+  background: var(--dock-header-bg);
+}
+/* old peek-header rules removed */
+
+/* ---------- splitters ---------- */
+.lc-splitter {
+  flex: 0 0 var(--dock-spl);
+  background: var(--dock-border);
+  position: relative;
+  z-index: 2;
+}
+.lc-splitter.vertical { cursor: ew-resize; width: var(--dock-spl); }
+.lc-splitter.horizontal { cursor: ns-resize; height: var(--dock-spl); width: auto; }
+.lc-splitter:hover, .lc-splitter.resizing { background: var(--dock-ci); }
+/* splitter adjacent to a collapsed dock is inert (no drag, no hover highlight) */
+.col-h + .lc-splitter, .col-v + .lc-splitter,
+.lc-splitter + .col-h, .lc-splitter + .col-v {
+  cursor: default;
+  opacity: 0.3;
+}
+.col-h + .lc-splitter:hover, .col-v + .lc-splitter:hover,
+.lc-splitter + .col-h:hover, .lc-splitter + .col-v:hover {
+  background: var(--dock-border);
+}
+
+.conn-dot {
+  position: fixed;
+  width: 8px; height: 8px;
+  border-radius: 999px;
+  background: var(--dock-fg-muted);
+  z-index: 50;
+  transform: translate(-50%, -50%);
+}
+.conn-dot:hover { background: var(--dock-ci); }
+.conn-dot.dragging { background: var(--dock-ci); }
+
+/* ---------- drop overlay ---------- */
+.lc-drop-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-rows: 1fr 2fr 1fr;
+  z-index: 20;
+  background: var(--dock-overlay-bg);
+  backdrop-filter: blur(var(--dock-overlay-blur, 6px));
+  -webkit-backdrop-filter: blur(var(--dock-overlay-blur, 6px));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--dock-anim) ease;
+  border-radius: var(--dock-radius);
+}
+.lc-drop-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
+.lc-embed > .lc-drop-overlay { z-index: 25; }
+
+/* ═══ Tabs group split overlay (5×4 grid) ═══════════════════════════════
+   For tabs groups, each edge is divided into two sub-boxes:
+     - OUTER part → operates on the tabs group itself (forId = group id)
+     - INNER part → operates on the active tab's dock (forId = active tab id)
+   The center has two nested boxes:
+     - OUTER box (center-group) → group operation
+     - INNER box (center-active) → active tab operation
+
+   Grid: 4 cols × 4 rows
+     Row 1: [corner] [top-group] [top-active] [corner]
+     Row 2: [left-group] [center-group] [center-group] [right-active]
+     Row 3: [left-active] [center-active] [center-active] [right-group]
+     Row 4: [corner] [bottom-active] [bottom-group] [corner]
+
+   The center-group spans cols 2-3, rows 2. The center-active spans
+   cols 2-3, rows 3. This gives the center a visual nesting:
+   group box (top half) → active tab box (bottom half). */
+.lc-tabs-split-overlay {
+  grid-template-columns: min(64px, 22%) 1fr 1fr min(64px, 22%);
+  grid-template-rows: min(64px, 22%) 1fr 1fr min(64px, 22%);
+  z-index: 30;
+}
+/* Group sub-zones — accent color (insert=green, tab=blue, embed=orange) */
+.lc-tabs-split-overlay .dz-top-group,
+.lc-tabs-split-overlay .dz-bottom-group,
+.lc-tabs-split-overlay .dz-left-group,
+.lc-tabs-split-overlay .dz-right-group,
+.lc-tabs-split-overlay .dz-center-group {
+  /* these use the normal drag-over styling */
+}
+/* Active tab sub-zones — slightly different inner style */
+.lc-tabs-split-overlay .dz-top-active,
+.lc-tabs-split-overlay .dz-bottom-active,
+.lc-tabs-split-overlay .dz-left-active,
+.lc-tabs-split-overlay .dz-right-active,
+.lc-tabs-split-overlay .dz-center-active {
+  /* these also use normal drag-over styling but the user can distinguish
+     them by position (inner vs outer) */
+}
+/* Corners in the split overlay are inert spacers */
+.lc-tabs-split-overlay .dz-corner .dz-inner { display: none; }
+/* Center group spans 2 cols × 1 row (the upper center area) */
+.lc-tabs-split-overlay .dz-center-group {
+  grid-column: 2 / 4;
+  grid-row: 2;
+}
+/* Center active spans 2 cols × 1 row (the lower center area) */
+.lc-tabs-split-overlay .dz-center-active {
+  grid-column: 2 / 4;
+  grid-row: 3;
+}
+
+.dz-corner { background: transparent; }
+.lc-dz {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+.dz-inner {
+  position: absolute;
+  inset: 6px;
+  border-radius: var(--dock-radius);
+  border: 2px dashed rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: inset var(--dock-anim) ease, border-color var(--dock-anim) ease, background var(--dock-anim) ease;
+}
+.dz-lbl {
+  font-family: var(--dock-font);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.85);
+  background: rgba(0,0,0,0.45);
+  padding: 3px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.lc-dz.drag-over .dz-inner { inset: 3px; }
+
+.lc-drop-overlay[data-mode="insert"] .lc-dz.drag-over .dz-inner { border-color: var(--dock-ci); background: color-mix(in srgb, var(--dock-ci) 18%, transparent); }
+.lc-drop-overlay[data-mode="tab"]    .lc-dz.drag-over .dz-inner { border-color: var(--dock-ct); background: color-mix(in srgb, var(--dock-ct) 18%, transparent); }
+.lc-drop-overlay[data-mode="embed"]  .lc-dz.drag-over .dz-inner { border-color: var(--dock-ce); background: color-mix(in srgb, var(--dock-ce) 18%, transparent); }
+
+.lc-drop-overlay[data-mode="insert"] .dz-lbl { color: var(--dock-ci); }
+.lc-drop-overlay[data-mode="tab"]    .dz-lbl { color: var(--dock-ct); }
+.lc-drop-overlay[data-mode="embed"]  .dz-lbl { color: var(--dock-ce); }
+
+/* ---------- embed host occupied-zone inner overlay ---------- */
+.dz-occupied > .dz-inner { opacity: 0.45; }
+.dz-inner-grid {
+  border: 1px dashed var(--dock-border);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--dock-card) 60%, transparent);
+}
+.dz-inner-grid > .lc-dz { min-height: 0; min-width: 0; }
+.dz-inner-grid > .lc-dz > .dz-inner { border-radius: 3px; }
+.dz-inner-grid .dz-lbl { font-size: 8px; padding: 1px 4px; letter-spacing: 0.06em; }
+.dz-inner-grid .lc-dz.drag-over > .dz-inner { inset: 1px !important; }
+
+/* ---------- collapse ---------- */
+.lc-panel.col-h, .lc-panel.col-v,
+.lc-container-wrapper.col-h, .lc-container-wrapper.col-v,
+.lc-tabs.col-h, .lc-tabs.col-v,
+.lc-embed.col-h, .lc-embed.col-v {
+  flex: 0 0 34px !important;
+  overflow: hidden;
+}
+.col-h .lc-panel-body, .col-h .lc-container,
+.col-v .lc-panel-body, .col-v .lc-container,
+.col-h .lc-tabs-content, .col-v .lc-tabs-content,
+.col-h .lc-tabs-bar, .col-v .lc-tabs-bar,
+.col-h .tabs-bar-resize, .col-v .tabs-bar-resize,
+.col-h .embed-bg, .col-v .embed-bg,
+.col-h .embed-zone, .col-v .embed-zone,
+.col-h .embed-float, .col-v .embed-float,
+.col-h .embed-inner, .col-v .embed-inner { display: none; }
+/* When collapsed, the tab bar LIST is hidden but the .lc-tabs-bar-container
+   (which holds the inline ⋯ corner button) stays visible. The container
+   collapses to 0 size (its only flow content is hidden) so it doesn't
+   affect the collapsed strip layout. */
+.col-h .lc-tabs-bar-container, .col-v .lc-tabs-bar-container {
+  min-height: 0;
+  min-width: 0;
+  z-index: 11;
+  position: static !important;
+}
+/* Reposition the ⋯ button to top-left when collapsed (matches DockCornerBar).
+   Without this, the button uses top:50% of a 0-size container → clipped. */
+.col-h .lc-tabs-bar-container > div:first-child,
+.col-v .lc-tabs-bar-container > div:first-child {
+  top: 3px !important;
+  left: 3px !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+}
+/* Make the ⋯ button fully visible when collapsed (override inline opacity:0.6). */
+.col-h .lc-tabs-bar-container button,
+.col-v .lc-tabs-bar-container button {
+  opacity: 1 !important;
+  background: var(--dock-bg-muted) !important;
+}
+/* collapsed dock: keep the corner bar visible so the user can expand it */
+.col-h .dock-corner-bar, .col-v .dock-corner-bar { z-index: 11; }
+
+/* ---------- collapsed dock label (icon + rotated text) ----------
+ * Visible only when the dock has col-h (narrow vertical strip) or
+ * col-v (short horizontal strip). Shows the dock's icon + label so the
+ * user can identify which collapsed dock is which. The corner button
+ * (⋮ toggle) sits on top via its own z-index.
+ *   col-h → vertical text (writing-mode + rotate 180 → reads bottom-to-top)
+ *   col-v → horizontal text
+ */
+.collapsed-label {
+  display: none;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  pointer-events: none;
+  color: var(--dock-fg-muted);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  z-index: 8;
+}
+.col-h > .collapsed-label,
+.col-v > .collapsed-label {
+  display: flex;
+}
+/* col-h: narrow vertical strip (34px wide, full height)
+ * label sits BELOW the corner button, fills the remaining vertical space */
+.col-h > .collapsed-label {
+  top: 24px;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  flex-direction: column;
+}
+/* col-v: short horizontal strip (34px tall, full width)
+ * label sits LEFT of the corner button, fills the remaining horizontal space */
+.col-v > .collapsed-label {
+  top: 0;
+  left: 4px;
+  right: 22px;
+  bottom: 0;
+  flex-direction: row;
+}
+/* corner-left variant (row/col groups): the corner button is at top-LEFT,
+ * so the label sits to its RIGHT instead */
+.col-v.corner-left > .collapsed-label {
+  top: 0;
+  left: 24px;
+  right: 4px;
+  bottom: 0;
+}
+.collapsed-label .cl-icon {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  opacity: 0.7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.collapsed-label .cl-icon > svg {
+  width: 14px;
+  height: 14px;
+}
+.collapsed-label .cl-text {
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* vertical text for col-h — reads bottom-to-top (common sidebar label pattern) */
+.col-h > .collapsed-label .cl-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  text-overflow: clip;
+}
+
+/* ---------- mode badge + toast ---------- */
+.mode-badge {
+  position: fixed;
+  top: 56px;
+  right: 16px;
+  z-index: 60;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-family: var(--dock-font);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity var(--dock-anim) ease;
+  pointer-events: none;
+  border: 1px solid var(--dock-border);
+  background: var(--dock-card);
+  color: var(--dock-fg);
+}
+.mode-badge.show { opacity: 1; }
+.mode-badge.mode-insert { color: var(--dock-ci); border-color: var(--dock-ci); }
+.mode-badge.mode-tab    { color: var(--dock-ct); border-color: var(--dock-ct); }
+.mode-badge.mode-embed  { color: var(--dock-ce); border-color: var(--dock-ce); }
+
+.toast {
+  position: fixed;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  z-index: 70;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--dock-card);
+  border: 1px solid var(--dock-border);
+  color: var(--dock-fg);
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity var(--dock-anim) ease, transform var(--dock-anim) ease;
+  pointer-events: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast .hl { font-weight: 600; }
+.toast .hl.mode-insert { color: var(--dock-ci); }
+.toast .hl.mode-tab    { color: var(--dock-ct); }
+.toast .hl.mode-embed  { color: var(--dock-ce); }
+
+/* dragging source dim */
+.lc-panel.dragging-src,
+.lc-container-wrapper.dragging-src,
+.lc-tabs.dragging-src,
+.lc-embed.dragging-src,
+.embed-float.dragging-src { opacity: 0.25; }
+
+/* ---------- dev panel ---------- */
+.dev-panel {
+  position: fixed;
+  right: 16px;
+  bottom: 64px;
+  width: 280px;
+  z-index: 55;
+  border: 1px solid var(--dock-border);
+  border-radius: var(--dock-radius);
+  background: var(--dock-card);
+  color: var(--dock-fg);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  font-size: 11px;
+  font-family: var(--dock-font);
+}
+.dev-panel-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  cursor: grab;
+  border-bottom: 1px solid var(--dock-border);
+  background: var(--dock-bg-muted);
+  border-radius: var(--dock-radius) var(--dock-radius) 0 0;
+}
+.dev-panel-body { padding: 10px; max-height: 320px; overflow: auto; }
+.tree-view {
+  white-space: pre;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 10px;
+  color: var(--dock-fg-muted);
+  line-height: 1.4;
+}
+
+/* ---------- auto-hide overlay scrollbars ----------
+ * Thin, transparent-by-default scrollbars that become visible on hover.
+ * Replaces the default browser scrollbar with an unobtrusive overlay that
+ * doesn't consume layout space and fades in/out smoothly.
+ */
+.dock-root,
+.dock-root * {
+  /* Firefox: thin scrollbar, transparent until hover */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.dock-root :hover {
+  scrollbar-color: var(--dock-border) transparent;
+}
+
+/* WebKit (Chrome, Safari, Edge) — overlay-style thin scrollbar */
+.dock-root ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.dock-root ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dock-root ::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+  transition: background 180ms ease;
+}
+/* show thumb when hovering the scrollable element */
+.dock-root :hover::-webkit-scrollbar-thumb {
+  background: var(--dock-border);
+}
+.dock-root ::-webkit-scrollbar-thumb:hover {
+  background: var(--dock-fg-muted);
+}
+.dock-root ::-webkit-scrollbar-corner {
+  background: transparent;
+}
